@@ -78,28 +78,34 @@ Lista com nome, tipo, observação. Ação "fomos!" cria o lugar a partir do ite
 
 ## 5. Dados
 
+O app usa o projeto Supabase existente `leolmgqlucuvjwquzmkl` ("PeSzpak's Project"), que já hospeda outro app (tabelas `profiles`, `categories`, `transactions`, `bills` em `public`). Para não colidir nem afetar esse app:
+
+- Todas as tabelas do TWS Score ficam em `public` com prefixo `tws_`.
+- Nenhum trigger ou alteração em `auth.users` (o Auth é compartilhado entre os apps).
+- Bucket de Storage dedicado `tws-photos`.
+
 ```
-allowed_emails  email (pk)
-profiles        id (pk, = auth.users.id), nome, avatar_emoji
-places          id, nome, tipo ('cafe'|'restaurante'), endereco,
+tws_members     user_id (pk, = auth.users.id), email (unique), nome, avatar_emoji
+tws_places      id, nome, tipo ('cafe'|'restaurante'), endereco,
                 lat, lng, visitado_em (date), criado_por, criado_em
-reviews         id, place_id, autor_id, nota_geral, comida, ambiente,
+tws_reviews     id, place_id, autor_id, nota_geral, comida, ambiente,
                 atendimento, preco (smallint 1–5, check), comentario,
                 criado_em; UNIQUE (place_id, autor_id)
-photos          id, place_id, autor_id, storage_path, criado_em
-wishlist        id, nome, tipo, observacao, criado_por, criado_em
+tws_photos      id, place_id, autor_id, storage_path, criado_em
+tws_wishlist    id, nome, tipo, observacao, criado_por, criado_em
 ```
 
 ## 6. Segurança e nota surpresa
 
-- **Acesso:** trigger em `auth.users` (before insert) rejeita e-mails fora de `allowed_emails`. Todas as tabelas exigem usuário autenticado presente em `profiles`.
-- **`reviews` — SELECT:** permitido se `autor_id = auth.uid()` **ou** se existem 2 avaliações para o `place_id`.
-- **`reviews` — INSERT:** apenas com `autor_id = auth.uid()`.
-- **`reviews` — UPDATE/DELETE:** nenhuma política → bloqueado.
-- **`review_status(place_id)`:** função `security definer` que retorna apenas quais autores já avaliaram (sem notas), para os selos de status.
+- **Acesso:** `tws_members` guarda os 2 membros, cadastrados via migração/seed. A função `tws_is_member()` (`security definer`) checa se `auth.uid()` está em `tws_members`. Toda política RLS das tabelas `tws_*` e do bucket `tws-photos` exige `tws_is_member()`. Qualquer outro usuário do Auth compartilhado consegue logar, mas não lê nem escreve nada; o app mostra a tela de "acesso restrito".
+- **Redirect do link mágico:** a URL do TWS Score (local e Vercel) é adicionada às Redirect URLs do Auth, sem remover as do outro app.
+- **`tws_reviews` — SELECT:** permitido se `autor_id = auth.uid()` **ou** se existem 2 avaliações para o `place_id`.
+- **`tws_reviews` — INSERT:** apenas com `autor_id = auth.uid()`.
+- **`tws_reviews` — UPDATE/DELETE:** nenhuma política → bloqueado.
+- **`tws_review_status(place_id)`:** função `security definer` que retorna apenas quais autores já avaliaram (sem notas), para os selos de status.
 - **Média do casal:** calculada no cliente quando as duas avaliações estão visíveis.
-- **`places`, `photos`, `wishlist`:** leitura/escrita para os dois usuários autenticados.
-- **Storage:** bucket privado `photos`; leitura via URLs assinadas para usuários autenticados.
+- **`tws_places`, `tws_photos`, `tws_wishlist`:** leitura/escrita para os dois membros.
+- **Storage:** bucket privado `tws-photos`; leitura via URLs assinadas, apenas para membros.
 
 ## 7. Comportamentos e erros
 
@@ -119,7 +125,7 @@ wishlist        id, nome, tipo, observacao, criado_por, criado_em
 
 ## 9. Testes
 
-- **RLS (SQL, Supabase local):** não ler a nota do outro antes de ambos avaliarem; ler depois; não editar/apagar avaliação; e-mail fora da lista não cadastra.
+- **RLS (SQL, Supabase local):** não ler a nota do outro antes de ambos avaliarem; ler depois; não editar/apagar avaliação; usuário do Auth que não é membro não lê nem escreve nada.
 - **Unitários (Vitest):** média do casal, status de espera, compressão de imagem, rascunho local.
 - **Componentes (Testing Library):** formulário de avaliação, card de revelação.
 - **Manual:** teste no celular (instalação PWA, fluxo completo a dois) antes do deploy.

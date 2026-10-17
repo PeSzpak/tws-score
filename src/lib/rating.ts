@@ -1,4 +1,4 @@
-import type { Review, ReviewState } from './types'
+import type { Review, ReviewState, Scores } from './types'
 
 export function coupleAverage(a: Review, b: Review): number {
   return (a.scores.notaGeral + b.scores.notaGeral) / 2
@@ -18,4 +18,17 @@ export function reviewState(myId: string, authorIds: string[], visible: Review[]
   if (mine) return { kind: 'waiting_partner', mine }
   if (authorIds.some((id) => id !== myId)) return { kind: 'waiting_me' }
   return { kind: 'none' }
+}
+
+export const CRITERIA = [
+  { key: 'comida', label: 'Comida/bebida' },
+  { key: 'ambiente', label: 'Ambiente' },
+  { key: 'atendimento', label: 'Atendimento' },
+  { key: 'preco', label: 'Preço' },
+] as const
+
+export function completeScores(s: Partial<Scores>): Scores | null {
+  const { notaGeral, comida, ambiente, atendimento, preco } = s
+  if (!notaGeral || !comida || !ambiente || !atendimento || !preco) return null
+  return { notaGeral, comida, ambiente, atendimento, preco }
 }

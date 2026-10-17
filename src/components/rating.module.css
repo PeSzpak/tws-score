@@ -19,7 +19,7 @@
 }
 
 .empty {
-  color: var(--border);
+  color: var(--empty);
 }
 
 .dotsRow {
@@ -53,7 +53,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--border);
+  background: var(--empty);
   transition: background-color 150ms ease, transform 150ms ease;
 }
 

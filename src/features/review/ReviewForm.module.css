@@ -1,0 +1,47 @@
+.form {
+  display: grid;
+  gap: 28px;
+}
+
+.section {
+  display: grid;
+  gap: 10px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+
+.overall {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 20px 12px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.criteria {
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.footer {
+  display: grid;
+  gap: 10px;
+  text-align: center;
+}
+
+.hint {
+  margin: 0;
+  font-size: 13px;
+}

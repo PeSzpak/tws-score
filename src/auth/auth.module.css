@@ -1,0 +1,46 @@
+.page {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 32px 24px;
+}
+
+.card {
+  display: grid;
+  gap: 24px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.mark {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.title {
+  font-size: 32px;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+}
+
+.form {
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+
+.sent {
+  padding: 20px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}

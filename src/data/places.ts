@@ -6,7 +6,7 @@ export type NewPlace = Omit<Place, 'criadoPor'>
 
 export async function listPlaces(): Promise<Place[]> {
   const { data, error } = await supabase
-    .from('tws_places')
+    .from('places')
     .select('*')
     .order('visitado_em', { ascending: false })
     .order('criado_em', { ascending: false })
@@ -15,13 +15,13 @@ export async function listPlaces(): Promise<Place[]> {
 }
 
 export async function getPlace(id: string): Promise<Place | null> {
-  const { data, error } = await supabase.from('tws_places').select('*').eq('id', id).maybeSingle()
+  const { data, error } = await supabase.from('places').select('*').eq('id', id).maybeSingle()
   if (error) throw error
   return data ? parsePlace(data) : null
 }
 
 export async function createPlace(input: NewPlace): Promise<void> {
-  const { error } = await supabase.from('tws_places').upsert(
+  const { error } = await supabase.from('places').upsert(
     {
       id: input.id,
       nome: input.nome,

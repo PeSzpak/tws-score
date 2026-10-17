@@ -14,17 +14,17 @@ PWA para um casal avaliar os cafés e restaurantes que visita junto. Cada pessoa
 
 ## Como a nota surpresa é garantida
 
-A regra vive no banco, não na interface. A política de RLS de `tws_reviews` só devolve uma avaliação a quem a escreveu, ou a qualquer membro quando o lugar já tem duas avaliações:
+A regra vive no banco, não na interface. A política de RLS de `reviews` só devolve uma avaliação a quem a escreveu, ou a qualquer membro quando o lugar já tem duas avaliações:
 
 ```sql
-create policy tws_reviews_select on public.tws_reviews
+create policy reviews_select on public.reviews
   for select to authenticated using (
-    public.tws_is_member()
-    and (autor_id = auth.uid() or public.tws_review_count(place_id) = 2)
+    public.is_member()
+    and (autor_id = auth.uid() or public.review_count(place_id) = 2)
   );
 ```
 
-Não existe política de `update` nem de `delete`, então uma avaliação enviada não muda mais. Os selos "esperando você" usam `tws_review_authors()`, que informa só quem já avaliou, nunca a nota.
+Não existe política de `update` nem de `delete`, então uma avaliação enviada não muda mais. Os selos "esperando você" usam `review_authors()`, que informa só quem já avaliou, nunca a nota.
 
 Os testes em `supabase/tests/` provam essas regras contra o banco real, dentro de uma transação desfeita no final.
 
@@ -50,7 +50,7 @@ Pré-requisitos: Node 20 ou mais recente e um projeto Supabase.
 
 3. Aplique as migrações de `supabase/migrations/` em ordem, pelo SQL Editor ou pela Supabase CLI.
 
-4. Cadastre os membros. Use `supabase/members.example.sql` como modelo.
+4. Crie as contas dos membros no Auth (Authentication > Users > Add user) e cadastre-os em `members`. Use `supabase/members.example.sql` como modelo. Deixe o cadastro de novos usuários desligado.
 
 5. No painel do Supabase, em **Authentication > URL Configuration**, adicione `http://localhost:5173` às Redirect URLs.
 

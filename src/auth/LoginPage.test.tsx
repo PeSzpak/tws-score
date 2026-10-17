@@ -13,7 +13,7 @@ beforeEach(() => {
   auth.verifyOtp.mockClear()
 })
 
-test('login nunca cria usuário novo no Auth compartilhado', async () => {
+test('login nunca cria usuário novo', async () => {
   render(<LoginPage />)
   await userEvent.type(screen.getByLabelText('Seu e-mail'), 'pedro@x.com')
   await userEvent.click(screen.getByRole('button', { name: 'Receber link' }))

@@ -1,6 +1,6 @@
 import { currentUserId, supabase } from '../lib/supabase'
 
-const BUCKET = 'tws-photos'
+const BUCKET = 'photos'
 const SIGNED_URL_SECONDS = 60 * 60
 
 export async function uploadPhoto(placeId: string, file: Blob): Promise<void> {
@@ -8,13 +8,13 @@ export async function uploadPhoto(placeId: string, file: Blob): Promise<void> {
   const upload = await supabase.storage.from(BUCKET).upload(path, file, { contentType: 'image/jpeg' })
   if (upload.error) throw upload.error
   const { error } = await supabase
-    .from('tws_photos')
+    .from('photos')
     .insert({ place_id: placeId, autor_id: await currentUserId(), storage_path: path })
   if (error) throw error
 }
 
 export async function listPhotoUrls(placeId?: string): Promise<{ placeId: string; url: string }[]> {
-  let query = supabase.from('tws_photos').select('place_id, storage_path').order('criado_em')
+  let query = supabase.from('photos').select('place_id, storage_path').order('criado_em')
   if (placeId) query = query.eq('place_id', placeId)
   const { data, error } = await query
   if (error) throw error

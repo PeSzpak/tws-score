@@ -5,7 +5,7 @@ import { parseReview } from './rows'
 const UNIQUE_VIOLATION = '23505'
 
 export async function listVisibleReviews(placeId?: string): Promise<Review[]> {
-  let query = supabase.from('tws_reviews').select('*')
+  let query = supabase.from('reviews').select('*')
   if (placeId) query = query.eq('place_id', placeId)
   const { data, error } = await query
   if (error) throw error
@@ -13,7 +13,7 @@ export async function listVisibleReviews(placeId?: string): Promise<Review[]> {
 }
 
 export async function listReviewAuthors(): Promise<Map<string, string[]>> {
-  const { data, error } = await supabase.rpc('tws_review_authors')
+  const { data, error } = await supabase.rpc('review_authors')
   if (error) throw error
   const byPlace = new Map<string, string[]>()
   for (const { place_id, autor_id } of data as { place_id: string; autor_id: string }[]) {
@@ -27,7 +27,7 @@ export async function submitReview(
   scores: Scores,
   comentario: string | null,
 ): Promise<'created' | 'already_sent'> {
-  const { error } = await supabase.from('tws_reviews').insert({
+  const { error } = await supabase.from('reviews').insert({
     place_id: placeId,
     autor_id: await currentUserId(),
     nota_geral: scores.notaGeral,

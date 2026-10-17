@@ -54,7 +54,9 @@
   height: 12px;
   border-radius: 50%;
   background: var(--empty);
-  transition: background-color 150ms ease, transform 150ms ease;
+  transition:
+    background-color 150ms ease,
+    transform 150ms ease;
 }
 
 .dotFilled {

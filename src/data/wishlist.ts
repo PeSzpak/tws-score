@@ -3,10 +3,7 @@ import type { WishItem } from '../lib/types'
 import { parseWish } from './rows'
 
 export async function listWishes(): Promise<WishItem[]> {
-  const { data, error } = await supabase
-    .from('tws_wishlist')
-    .select('*')
-    .order('criado_em', { ascending: false })
+  const { data, error } = await supabase.from('tws_wishlist').select('*').order('criado_em', { ascending: false })
   if (error) throw error
   return data.map(parseWish)
 }

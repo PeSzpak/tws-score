@@ -45,6 +45,15 @@ test('parsePlace aceita lugar sem localização', () => {
 
 test('parsePlace rejeita tipo desconhecido', () => {
   expect(() =>
-    parsePlace({ id: 'p1', nome: 'X', tipo: 'bar', endereco: null, lat: null, lng: null, visitado_em: '2026-10-16', criado_por: 'u1' }),
+    parsePlace({
+      id: 'p1',
+      nome: 'X',
+      tipo: 'bar',
+      endereco: null,
+      lat: null,
+      lng: null,
+      visitado_em: '2026-10-16',
+      criado_por: 'u1',
+    }),
   ).toThrow()
 })

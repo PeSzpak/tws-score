@@ -3,9 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
 export type SessionState =
-  | { status: 'loading' }
-  | { status: 'signed_out' }
-  | { status: 'signed_in'; userId: string; email: string }
+  { status: 'loading' } | { status: 'signed_out' } | { status: 'signed_in'; userId: string; email: string }
 
 function toState(session: Session | null): SessionState {
   if (!session) return { status: 'signed_out' }

@@ -8,9 +8,7 @@ import { RestrictedPage } from './RestrictedPage'
 import { useSession } from './useSession'
 
 type Access = { forUser: string; attempt: number } & (
-  | { status: 'restricted' }
-  | { status: 'error' }
-  | { status: 'member'; couple: Couple }
+  { status: 'restricted' } | { status: 'error' } | { status: 'member'; couple: Couple }
 )
 
 export function AuthGate({ children }: { children: ReactNode }) {

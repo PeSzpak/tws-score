@@ -55,7 +55,16 @@ test('localização que chega depois não desfaz o que foi escolhido enquanto is
 
 test('mostra o lugar que a parceira acabou de registrar para avaliar o mesmo', async () => {
   places.list = [
-    { id: 'p9', nome: 'Café Lumi', tipo: 'cafe', endereco: null, lat: null, lng: null, visitadoEm: '2026-10-16', criadoPor: 'u2' },
+    {
+      id: 'p9',
+      nome: 'Café Lumi',
+      tipo: 'cafe',
+      endereco: null,
+      lat: null,
+      lng: null,
+      visitadoEm: '2026-10-16',
+      criadoPor: 'u2',
+    },
   ]
   render(<NewVisitPage />, { wrapper: MemoryRouter })
   expect(await screen.findByText(/Belle já registrou/)).toBeInTheDocument()

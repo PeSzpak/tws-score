@@ -53,7 +53,10 @@ test('avaliação já enviada conta como sucesso', async () => {
 
 test('foto que falha não impede o envio', async () => {
   const d = deps({
-    compressImage: vi.fn().mockRejectedValueOnce(new Error('heic')).mockImplementation(async (f: File) => f),
+    compressImage: vi
+      .fn()
+      .mockRejectedValueOnce(new Error('heic'))
+      .mockImplementation(async (f: File) => f),
   })
   const result = await submitVisit(draft(), [photo('a.heic'), photo('b.jpg')], d)
   expect(result.photoErrors).toBe(1)

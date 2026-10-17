@@ -23,7 +23,9 @@ export function KindIcon({ tipo, size = 22 }: { tipo: Place['tipo']; size?: numb
 export function PlaceCard({ place, state, partnerName, cover }: Props) {
   return (
     <Link to={`/lugar/${place.id}`} className={styles.card}>
-      <div className={styles.cover}>{cover ? <img src={cover} alt="" loading="lazy" /> : <KindIcon tipo={place.tipo} />}</div>
+      <div className={styles.cover}>
+        {cover ? <img src={cover} alt="" loading="lazy" /> : <KindIcon tipo={place.tipo} />}
+      </div>
       <div className={styles.body}>
         <span className={styles.name}>{place.nome}</span>
         <div className={styles.meta}>

@@ -2,8 +2,7 @@ import { NavLink } from 'react-router'
 import { Bookmark, House, Map, Plus } from 'lucide-react'
 import styles from './BottomNav.module.css'
 
-const linkClass = ({ isActive }: { isActive: boolean }) =>
-  isActive ? `${styles.link} ${styles.active}` : styles.link
+const linkClass = ({ isActive }: { isActive: boolean }) => (isActive ? `${styles.link} ${styles.active}` : styles.link)
 
 export function BottomNav() {
   return (

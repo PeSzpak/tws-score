@@ -20,7 +20,9 @@
   background: transparent;
   color: var(--text-muted);
   font-size: 14px;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .segment[aria-pressed='true'] {

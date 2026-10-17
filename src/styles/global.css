@@ -72,7 +72,9 @@ button {
   border-radius: 999px;
   background: var(--surface);
   font-weight: 500;
-  transition: transform 150ms ease, opacity 150ms ease;
+  transition:
+    transform 150ms ease,
+    opacity 150ms ease;
 }
 
 .btn:active {

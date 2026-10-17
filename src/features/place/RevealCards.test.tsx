@@ -30,7 +30,12 @@ test('esperando o parceiro não mostra nada da avaliação dele', () => {
 
 test('revelado mostra a nota do casal e o comentário do parceiro', () => {
   render(
-    <RevealCards state={{ kind: 'revealed', mine, theirs, average: 4.5 }} me={me} partner={partner} onReview={vi.fn()} />,
+    <RevealCards
+      state={{ kind: 'revealed', mine, theirs, average: 4.5 }}
+      me={me}
+      partner={partner}
+      onReview={vi.fn()}
+    />,
   )
   expect(screen.getByText('Nota do casal')).toBeInTheDocument()
   expect(screen.getByText('4,5')).toBeInTheDocument()
@@ -51,7 +56,12 @@ test('quem completa o par vê a revelação animada', () => {
     <RevealCards state={{ kind: 'waiting_me' }} me={me} partner={partner} onReview={vi.fn()} />,
   )
   rerender(
-    <RevealCards state={{ kind: 'revealed', mine, theirs, average: 4.5 }} me={me} partner={partner} onReview={vi.fn()} />,
+    <RevealCards
+      state={{ kind: 'revealed', mine, theirs, average: 4.5 }}
+      me={me}
+      partner={partner}
+      onReview={vi.fn()}
+    />,
   )
   expect(screen.getByText('Melhor croissant da vida').closest('article')).toHaveAttribute('data-reveal', 'true')
 })

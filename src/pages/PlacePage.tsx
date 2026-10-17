@@ -47,7 +47,9 @@ export function PlacePage() {
   const location = useLocation()
   const { me, partner, userId } = useMembers()
   const data = useLoad(() => loadPlace(id), id)
-  const [notice, setNotice] = useState(() => photoNotice((location.state as { photoErrors?: number })?.photoErrors ?? 0))
+  const [notice, setNotice] = useState(() =>
+    photoNotice((location.state as { photoErrors?: number })?.photoErrors ?? 0),
+  )
   const [reviewing, setReviewing] = useState(false)
   const [form, setForm] = useState<ReviewFormValue>(() => {
     const d = loadDraft(placeDraftKey(id))

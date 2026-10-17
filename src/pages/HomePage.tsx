@@ -34,7 +34,7 @@ export function HomePage() {
   const { userId, partner } = useMembers()
   const [kind, setKind] = useState<KindFilter>('todos')
   const [query, setQuery] = useState('')
-  const home$ = useLoad(loadHome, [])
+  const home$ = useLoad(loadHome, 'home')
 
   return (
     <main className={styles.page}>

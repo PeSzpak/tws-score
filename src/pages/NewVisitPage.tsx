@@ -94,12 +94,16 @@ export function NewVisitPage() {
       </header>
 
       {step === 1 ? (
-        <PlaceStep value={draft.place} onChange={(place) => setDraft({ ...draft, place })} onNext={() => setStep(2)} />
+        <PlaceStep
+          value={draft.place}
+          onChange={(patch) => setDraft((d) => ({ ...d, place: { ...d.place, ...patch } }))}
+          onNext={() => setStep(2)}
+        />
       ) : (
         <ReviewForm
           value={{ scores: draft.scores, comentario: draft.comentario, photos }}
           onChange={(v) => {
-            setDraft({ ...draft, scores: v.scores, comentario: v.comentario })
+            setDraft((d) => ({ ...d, scores: v.scores, comentario: v.comentario }))
             setPhotos(v.photos)
           }}
           onSubmit={send}

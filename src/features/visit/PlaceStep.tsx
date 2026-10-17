@@ -8,7 +8,7 @@ type PlaceDraft = VisitDraft['place']
 
 type Props = {
   value: PlaceDraft
-  onChange: (p: PlaceDraft) => void
+  onChange: (patch: Partial<PlaceDraft>) => void
   onNext: () => void
 }
 
@@ -40,7 +40,7 @@ export function PlaceStep({ value, onChange, onNext }: Props) {
     setLocating(true)
     const coords = await currentPosition()
     setLocating(false)
-    if (coords) onChange({ ...value, ...coords, endereco: null })
+    if (coords) onChange({ ...coords, endereco: null })
     else setGpsFailed(true)
   }
 
@@ -58,7 +58,7 @@ export function PlaceStep({ value, onChange, onNext }: Props) {
           className="input"
           value={value.nome}
           autoComplete="off"
-          onChange={(e) => onChange({ ...value, nome: e.target.value })}
+          onChange={(e) => onChange({ nome: e.target.value })}
         />
       </label>
 
@@ -67,7 +67,7 @@ export function PlaceStep({ value, onChange, onNext }: Props) {
           type="button"
           className={styles.option}
           aria-pressed={value.tipo === 'cafe'}
-          onClick={() => onChange({ ...value, tipo: 'cafe' })}
+          onClick={() => onChange({ tipo: 'cafe' })}
         >
           <Coffee size={18} strokeWidth={1.6} /> Café
         </button>
@@ -75,7 +75,7 @@ export function PlaceStep({ value, onChange, onNext }: Props) {
           type="button"
           className={styles.option}
           aria-pressed={value.tipo === 'restaurante'}
-          onClick={() => onChange({ ...value, tipo: 'restaurante' })}
+          onClick={() => onChange({ tipo: 'restaurante' })}
         >
           <UtensilsCrossed size={18} strokeWidth={1.6} /> Restaurante
         </button>
@@ -87,7 +87,7 @@ export function PlaceStep({ value, onChange, onNext }: Props) {
           <div className={styles.chosen}>
             <MapPin size={16} />
             <span>{value.endereco ?? 'Localização atual'}</span>
-            <button type="button" onClick={() => onChange({ ...value, lat: null, lng: null, endereco: null })}>
+            <button type="button" onClick={() => onChange({ lat: null, lng: null, endereco: null })}>
               trocar
             </button>
           </div>
@@ -115,7 +115,7 @@ export function PlaceStep({ value, onChange, onNext }: Props) {
                     <button
                       type="button"
                       onClick={() => {
-                        onChange({ ...value, lat: r.lat, lng: r.lng, endereco: r.label })
+                        onChange({ lat: r.lat, lng: r.lng, endereco: r.label })
                         setQuery('')
                         setResults([])
                       }}
@@ -137,7 +137,7 @@ export function PlaceStep({ value, onChange, onNext }: Props) {
           className="input"
           type="date"
           value={value.visitadoEm}
-          onChange={(e) => onChange({ ...value, visitadoEm: e.target.value })}
+          onChange={(e) => onChange({ visitadoEm: e.target.value })}
         />
       </label>
 

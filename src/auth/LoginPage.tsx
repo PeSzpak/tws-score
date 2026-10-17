@@ -12,7 +12,7 @@ export function LoginPage() {
     setState('sending')
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
-      options: { emailRedirectTo: window.location.origin },
+      options: { emailRedirectTo: window.location.origin, shouldCreateUser: false },
     })
     setState(error ? 'error' : 'sent')
   }
@@ -46,7 +46,7 @@ export function LoginPage() {
             <button className="btn btn-primary" disabled={state === 'sending'}>
               Receber link
             </button>
-            {state === 'error' && <p className="error">Não deu pra enviar agora. Tenta de novo?</p>}
+            {state === 'error' && <p className="error">Não deu pra enviar. Confere o e-mail e tenta de novo?</p>}
           </form>
         )}
       </div>

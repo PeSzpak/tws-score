@@ -3,12 +3,12 @@ import type { Member } from '../lib/types'
 import { AuthGate } from './AuthGate'
 
 const session = vi.hoisted(() => ({ current: { status: 'signed_out' } as unknown }))
-const members = vi.hoisted(() => ({ list: [] as Member[] }))
+const members = vi.hoisted(() => ({ list: [] as Member[], fail: false }))
 
 vi.mock('./useSession', () => ({ useSession: () => session.current }))
 vi.mock('../data/members', () => ({
   claimMembership: () => Promise.resolve(),
-  listMembers: () => Promise.resolve(members.list),
+  listMembers: () => (members.fail ? Promise.reject(new Error('offline')) : Promise.resolve(members.list)),
 }))
 
 const pedro: Member = { email: 'pedro@x.com', nome: 'Pedro', avatarEmoji: '☕', userId: 'u1' }
@@ -34,4 +34,14 @@ test('membro vê o app', async () => {
   members.list = [pedro, belle]
   render(<AuthGate>conteúdo</AuthGate>)
   expect(await screen.findByText('conteúdo')).toBeInTheDocument()
+})
+
+test('falha de rede não diz que o membro não tem acesso', async () => {
+  session.current = { status: 'signed_in', userId: 'u1', email: 'pedro@x.com' }
+  members.list = [pedro, belle]
+  members.fail = true
+  render(<AuthGate>conteúdo</AuthGate>)
+  expect(await screen.findByRole('button', { name: 'Tentar de novo' })).toBeInTheDocument()
+  expect(screen.queryByText(/Esse cantinho é só nosso/)).not.toBeInTheDocument()
+  members.fail = false
 })

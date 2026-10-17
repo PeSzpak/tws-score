@@ -52,3 +52,7 @@ export function clearDraft(key: string): void {
     // Same as saveDraft.
   }
 }
+
+export function forgetNewVisitDraftFor(placeId: string): void {
+  if (loadDraft(NEW_VISIT_DRAFT)?.placeId === placeId) clearDraft(NEW_VISIT_DRAFT)
+}

@@ -11,7 +11,12 @@ import { submitVisit } from '../features/visit/submitVisit'
 import { clearDraft, emptyDraft, loadDraft, NEW_VISIT_DRAFT, saveDraft, type VisitDraft } from '../lib/draft'
 import { todayIso } from '../lib/geo'
 import { compressImage } from '../lib/image'
+import visit from '../features/visit/visit.module.css'
 import styles from './page.module.css'
+
+function formatShortDate(iso: string): string {
+  return new Date(`${iso}T12:00:00`).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })
+}
 
 export function NewVisitPage() {
   const navigate = useNavigate()
@@ -34,6 +39,14 @@ export function NewVisitPage() {
       setStep(1)
     })
   }, [wishId, draft.wishId])
+
+  function discardDraft() {
+    clearDraft(NEW_VISIT_DRAFT)
+    setDraft(emptyDraft(todayIso()))
+    setPhotos([])
+    setError(null)
+    setStep(1)
+  }
 
   async function send() {
     setSubmitting(true)
@@ -68,6 +81,16 @@ export function NewVisitPage() {
           </button>
         )}
         <h1 className={styles.title}>{step === 1 ? 'Nova visita' : 'Sua avaliação'}</h1>
+        {draft.placeId && (
+          <div className={visit.pending}>
+            <p>
+              Terminando a avaliação de <strong>{draft.place.nome}</strong> ({formatShortDate(draft.place.visitadoEm)}).
+            </p>
+            <button className="btn btn-ghost" onClick={discardDraft}>
+              Descartar rascunho
+            </button>
+          </div>
+        )}
       </header>
 
       {step === 1 ? (

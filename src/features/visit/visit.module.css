@@ -1,0 +1,22 @@
+.pending {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: 12px;
+  padding: 10px 6px 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  font-size: 14px;
+}
+
+.pending p {
+  margin: 0;
+}
+
+.pending button {
+  min-height: 36px;
+  padding: 0 10px;
+  font-size: 14px;
+}

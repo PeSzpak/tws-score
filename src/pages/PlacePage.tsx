@@ -12,7 +12,7 @@ import { PhotoGallery } from '../features/place/PhotoGallery'
 import { RevealCards } from '../features/place/RevealCards'
 import { ReviewForm, type ReviewFormValue } from '../features/review/ReviewForm'
 import { uploadPhotos } from '../features/visit/submitVisit'
-import { clearDraft, emptyDraft, loadDraft, placeDraftKey, saveDraft } from '../lib/draft'
+import { clearDraft, emptyDraft, forgetNewVisitDraftFor, loadDraft, placeDraftKey, saveDraft } from '../lib/draft'
 import { todayIso } from '../lib/geo'
 import { compressImage } from '../lib/image'
 import { completeScores, reviewState } from '../lib/rating'
@@ -70,6 +70,7 @@ export function PlacePage() {
       await submitReview(id, scores, form.comentario.trim() || null)
       const photoErrors = await uploadPhotos(id, form.photos, { uploadPhoto, compressImage })
       clearDraft(placeDraftKey(id))
+      forgetNewVisitDraftFor(id)
       setNotice(photoNotice(photoErrors))
       setReviewing(false)
       data.reload()

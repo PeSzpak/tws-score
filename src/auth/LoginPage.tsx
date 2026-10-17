@@ -3,18 +3,37 @@ import { Heart } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import styles from './auth.module.css'
 
+type Step = 'email' | 'sending' | 'code' | 'verifying'
+
 export function LoginPage() {
   const [email, setEmail] = useState('')
-  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [code, setCode] = useState('')
+  const [step, setStep] = useState<Step>('email')
+  const [error, setError] = useState<string | null>(null)
 
-  async function submit(event: FormEvent) {
+  async function sendLink(event: FormEvent) {
     event.preventDefault()
-    setState('sending')
+    setStep('sending')
+    setError(null)
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: { emailRedirectTo: window.location.origin, shouldCreateUser: false },
     })
-    setState(error ? 'error' : 'sent')
+    if (error) {
+      setError('Não deu pra enviar. Confere o e-mail e tenta de novo?')
+      setStep('email')
+    } else {
+      setStep('code')
+    }
+  }
+
+  async function verifyCode(event: FormEvent) {
+    event.preventDefault()
+    setStep('verifying')
+    setError(null)
+    const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'email' })
+    if (error) setError('Código não confere. Dá uma olhada no e-mail mais recente?')
+    setStep('code')
   }
 
   return (
@@ -28,10 +47,30 @@ export function LoginPage() {
           <p className={`${styles.subtitle} muted`}>Nossos cafés e restaurantes favoritos.</p>
         </div>
 
-        {state === 'sent' ? (
-          <p className={styles.sent}>Te mandamos um link. É só abrir no celular. 💌</p>
+        {step === 'code' || step === 'verifying' ? (
+          <form className={styles.form} onSubmit={verifyCode}>
+            <p className={styles.sent}>Te mandamos um e-mail. Abre o link ou digita o código aqui. 💌</p>
+            <label className="field">
+              Código do e-mail
+              <input
+                className="input"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={8}
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+              />
+            </label>
+            <button className="btn btn-primary" disabled={code.length < 6 || step === 'verifying'}>
+              Entrar
+            </button>
+            {error && <p className="error">{error}</p>}
+            <button type="button" className="btn btn-ghost" onClick={() => setStep('email')}>
+              Usar outro e-mail
+            </button>
+          </form>
         ) : (
-          <form className={styles.form} onSubmit={submit}>
+          <form className={styles.form} onSubmit={sendLink}>
             <label className="field">
               Seu e-mail
               <input
@@ -43,10 +82,10 @@ export function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </label>
-            <button className="btn btn-primary" disabled={state === 'sending'}>
+            <button className="btn btn-primary" disabled={step === 'sending'}>
               Receber link
             </button>
-            {state === 'error' && <p className="error">Não deu pra enviar. Confere o e-mail e tenta de novo?</p>}
+            {error && <p className="error">{error}</p>}
           </form>
         )}
       </div>

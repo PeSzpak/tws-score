@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import { ChevronLeft } from 'lucide-react'
 import { useMembers } from '../auth/members-context'
 import { LoadError } from '../components/LoadError'
-import { MiniMap } from '../components/MiniMap'
 import { listPhotoUrls, uploadPhoto } from '../data/photos'
 import { getPlace } from '../data/places'
 import { listReviewAuthors, listVisibleReviews, submitReview } from '../data/reviews'
@@ -19,6 +18,8 @@ import { compressImage } from '../lib/image'
 import { completeScores, reviewState } from '../lib/rating'
 import { useLoad } from '../lib/useLoad'
 import styles from './page.module.css'
+
+const MiniMap = lazy(() => import('../components/MiniMap').then((m) => ({ default: m.MiniMap })))
 
 async function loadPlace(id: string) {
   const [found, authors, reviews, photos] = await Promise.all([
@@ -140,7 +141,11 @@ export function PlacePage() {
 
         <PhotoGallery urls={data.data.photos} uploading={busy} onAdd={addPhotos} />
 
-        {p.lat !== null && p.lng !== null && <MiniMap lat={p.lat} lng={p.lng} />}
+        {p.lat !== null && p.lng !== null && (
+          <Suspense>
+            <MiniMap lat={p.lat} lng={p.lng} />
+          </Suspense>
+        )}
       </div>
     </main>
   )

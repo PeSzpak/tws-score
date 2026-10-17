@@ -1,16 +1,20 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router'
 import { AuthGate } from './auth/AuthGate'
 import { BottomNav } from './components/BottomNav'
 import { HomePage } from './pages/HomePage'
-import { MapPage } from './pages/MapPage'
 import { NewVisitPage } from './pages/NewVisitPage'
 import { PlacePage } from './pages/PlacePage'
 import { WishlistPage } from './pages/WishlistPage'
 
+const MapPage = lazy(() => import('./pages/MapPage').then((m) => ({ default: m.MapPage })))
+
 function Shell() {
   return (
     <>
-      <Outlet />
+      <Suspense>
+        <Outlet />
+      </Suspense>
       <BottomNav />
     </>
   )

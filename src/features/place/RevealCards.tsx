@@ -26,7 +26,7 @@ function Who({ member }: { member: Member }) {
 
 function ReviewCard({ member, review, reveal }: { member: Member; review: Review; reveal: boolean }) {
   return (
-    <article className={`${styles.card} ${reveal ? styles.reveal : ''}`}>
+    <article className={`${styles.card} ${reveal ? styles.reveal : ''}`} data-reveal={reveal}>
       <Who member={member} />
       <Hearts value={review.scores.notaGeral} size="lg" />
       <div>
@@ -61,9 +61,8 @@ function PromptCard({ text, onReview }: { text: string; onReview: () => void }) 
 
 const seenKey = (placeId: string) => `tws:revealed:${placeId}`
 
-function useFirstReveal(placeId: string | null): boolean {
+function useFirstReveal(placeId: string): boolean {
   const [first] = useState(() => {
-    if (!placeId) return false
     try {
       return localStorage.getItem(seenKey(placeId)) === null
     } catch {
@@ -72,7 +71,6 @@ function useFirstReveal(placeId: string | null): boolean {
   })
 
   useEffect(() => {
-    if (!placeId) return
     try {
       localStorage.setItem(seenKey(placeId), '1')
     } catch {
@@ -83,28 +81,31 @@ function useFirstReveal(placeId: string | null): boolean {
   return first
 }
 
+type RevealedState = Extract<ReviewState, { kind: 'revealed' }>
+
+function Revealed({ state, me, partner }: { state: RevealedState; me: Member; partner: Member | null }) {
+  const firstReveal = useFirstReveal(state.mine.placeId)
+  return (
+    <section className={styles.wrap}>
+      <div className={`${styles.couple} ${firstReveal ? styles.reveal : ''}`}>
+        <span className={styles.coupleLabel}>Nota do casal</span>
+        <span className={styles.coupleScore}>
+          <Heart size={28} fill="currentColor" strokeWidth={0} aria-hidden />
+          {formatScore(state.average)}
+        </span>
+      </div>
+      <div className={styles.cards}>
+        <ReviewCard member={me} review={state.mine} reveal={false} />
+        {partner && <ReviewCard member={partner} review={state.theirs} reveal={firstReveal} />}
+      </div>
+    </section>
+  )
+}
+
 export function RevealCards({ state, me, partner, onReview }: Props) {
   const partnerName = partner?.nome ?? 'O outro'
-  const revealed = state.kind === 'revealed'
-  const firstReveal = useFirstReveal(revealed ? state.mine.placeId : null)
 
-  if (state.kind === 'revealed') {
-    return (
-      <section className={styles.wrap}>
-        <div className={`${styles.couple} ${firstReveal ? styles.reveal : ''}`}>
-          <span className={styles.coupleLabel}>Nota do casal</span>
-          <span className={styles.coupleScore}>
-            <Heart size={28} fill="currentColor" strokeWidth={0} aria-hidden />
-            {formatScore(state.average)}
-          </span>
-        </div>
-        <div className={styles.cards}>
-          <ReviewCard member={me} review={state.mine} reveal={false} />
-          {partner && <ReviewCard member={partner} review={state.theirs} reveal={firstReveal} />}
-        </div>
-      </section>
-    )
-  }
+  if (state.kind === 'revealed') return <Revealed state={state} me={me} partner={partner} />
 
   return (
     <section className={styles.cards}>
@@ -117,7 +118,11 @@ export function RevealCards({ state, me, partner, onReview }: Props) {
         />
       )}
       <SealedCard
-        text={state.kind === 'waiting_me' ? `A nota de ${partnerName} aparece quando você avaliar` : `${partnerName} ainda não avaliou`}
+        text={
+          state.kind === 'waiting_me'
+            ? `A nota de ${partnerName} aparece quando você avaliar`
+            : `${partnerName} ainda não avaliou`
+        }
       />
     </section>
   )

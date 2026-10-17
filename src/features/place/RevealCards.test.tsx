@@ -44,3 +44,23 @@ test('quando falta a minha, oferece avaliar', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Avaliar' }))
   expect(onReview).toHaveBeenCalled()
 })
+
+test('quem completa o par vê a revelação animada', () => {
+  localStorage.clear()
+  const { rerender } = render(
+    <RevealCards state={{ kind: 'waiting_me' }} me={me} partner={partner} onReview={vi.fn()} />,
+  )
+  rerender(
+    <RevealCards state={{ kind: 'revealed', mine, theirs, average: 4.5 }} me={me} partner={partner} onReview={vi.fn()} />,
+  )
+  expect(screen.getByText('Melhor croissant da vida').closest('article')).toHaveAttribute('data-reveal', 'true')
+})
+
+test('a revelação anima só na primeira vez', () => {
+  localStorage.clear()
+  const props = { state: { kind: 'revealed', mine, theirs, average: 4.5 } as const, me, partner, onReview: vi.fn() }
+  const first = render(<RevealCards {...props} />)
+  first.unmount()
+  render(<RevealCards {...props} />)
+  expect(screen.getByText('Melhor croissant da vida').closest('article')).toHaveAttribute('data-reveal', 'false')
+})

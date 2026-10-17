@@ -40,6 +40,7 @@ export function NewVisitPage() {
     setError(null)
     try {
       const { placeId, photoErrors } = await submitVisit(draft, photos, {
+        newId: () => crypto.randomUUID(),
         createPlace,
         submitReview,
         uploadPhoto,

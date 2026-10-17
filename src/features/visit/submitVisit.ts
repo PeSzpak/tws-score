@@ -1,10 +1,11 @@
 import type { NewPlace } from '../../data/places'
 import type { VisitDraft } from '../../lib/draft'
 import { completeScores } from '../../lib/rating'
-import type { Place, Scores } from '../../lib/types'
+import type { Scores } from '../../lib/types'
 
 export type SubmitDeps = {
-  createPlace: (input: NewPlace) => Promise<Place>
+  newId: () => string
+  createPlace: (input: NewPlace) => Promise<void>
   submitReview: (placeId: string, scores: Scores, comentario: string | null) => Promise<'created' | 'already_sent'>
   uploadPhoto: (placeId: string, file: Blob) => Promise<void>
   compressImage: (file: File) => Promise<Blob>
@@ -32,9 +33,10 @@ export async function submitVisit(draft: VisitDraft, photos: File[], deps: Submi
 
   let placeId = draft.placeId
   if (!placeId) {
-    placeId = (await deps.createPlace({ nome: nome.trim(), tipo, endereco, lat, lng, visitadoEm })).id
+    placeId = deps.newId()
     deps.saveDraft({ ...draft, placeId })
   }
+  await deps.createPlace({ id: placeId, nome: nome.trim(), tipo, endereco, lat, lng, visitadoEm })
 
   await deps.submitReview(placeId, scores, draft.comentario.trim() || null)
   const photoErrors = await uploadPhotos(placeId, photos, deps)

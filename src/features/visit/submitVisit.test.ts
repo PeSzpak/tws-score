@@ -1,17 +1,5 @@
 import { emptyDraft, type VisitDraft } from '../../lib/draft'
-import type { Place } from '../../lib/types'
 import { submitVisit, type SubmitDeps } from './submitVisit'
-
-const created: Place = {
-  id: 'p1',
-  nome: 'Café Lumi',
-  tipo: 'cafe',
-  endereco: null,
-  lat: -23.5,
-  lng: -46.6,
-  visitadoEm: '2026-10-16',
-  criadoPor: 'u1',
-}
 
 function draft(overrides: Partial<VisitDraft> = {}): VisitDraft {
   const base = emptyDraft('2026-10-16')
@@ -26,7 +14,8 @@ function draft(overrides: Partial<VisitDraft> = {}): VisitDraft {
 
 function deps(overrides: Partial<SubmitDeps> = {}): SubmitDeps {
   return {
-    createPlace: vi.fn().mockResolvedValue(created),
+    newId: () => 'p1',
+    createPlace: vi.fn().mockResolvedValue(undefined),
     submitReview: vi.fn().mockResolvedValue('created'),
     uploadPhoto: vi.fn().mockResolvedValue(undefined),
     compressImage: vi.fn(async (f: File) => f),
@@ -54,7 +43,7 @@ test('reenviar depois de falha na avaliação não cria outro lugar', async () =
   expect(saved.placeId).toBe('p1')
 
   await submitVisit(saved, [], d)
-  expect(d.createPlace).toHaveBeenCalledTimes(1)
+  expect(vi.mocked(d.createPlace).mock.calls.map(([p]) => p.id)).toEqual(['p1', 'p1'])
 })
 
 test('avaliação já enviada conta como sucesso', async () => {
@@ -82,6 +71,20 @@ test('item da lista queremos ir sai depois do envio', async () => {
   const d = deps()
   await submitVisit(draft({ wishId: 'w1' }), [], d)
   expect(d.removeWish).toHaveBeenCalledWith('w1')
+})
+
+test('resposta perdida ao criar o lugar: tentar de novo reusa o mesmo id', async () => {
+  let n = 0
+  const d = deps({
+    newId: () => `id-${++n}`,
+    createPlace: vi.fn().mockRejectedValueOnce(new Error('timeout')).mockResolvedValue(undefined),
+  })
+  await expect(submitVisit(draft(), [], d)).rejects.toThrow('timeout')
+  const saved = vi.mocked(d.saveDraft).mock.lastCall![0]
+  expect(saved.placeId).toBe('id-1')
+
+  await submitVisit(saved, [], d)
+  expect(vi.mocked(d.createPlace).mock.calls.map(([p]) => p.id)).toEqual(['id-1', 'id-1'])
 })
 
 test('rascunho incompleto é recusado sem tocar no banco', async () => {

@@ -2,7 +2,7 @@ import { currentUserId, supabase } from '../lib/supabase'
 import type { Place } from '../lib/types'
 import { parsePlace } from './rows'
 
-export type NewPlace = Omit<Place, 'id' | 'criadoPor'>
+export type NewPlace = Omit<Place, 'criadoPor'>
 
 export async function listPlaces(): Promise<Place[]> {
   const { data, error } = await supabase
@@ -20,10 +20,10 @@ export async function getPlace(id: string): Promise<Place | null> {
   return data ? parsePlace(data) : null
 }
 
-export async function createPlace(input: NewPlace): Promise<Place> {
-  const { data, error } = await supabase
-    .from('tws_places')
-    .insert({
+export async function createPlace(input: NewPlace): Promise<void> {
+  const { error } = await supabase.from('tws_places').upsert(
+    {
+      id: input.id,
       nome: input.nome,
       tipo: input.tipo,
       endereco: input.endereco,
@@ -31,9 +31,8 @@ export async function createPlace(input: NewPlace): Promise<Place> {
       lng: input.lng,
       visitado_em: input.visitadoEm,
       criado_por: await currentUserId(),
-    })
-    .select()
-    .single()
+    },
+    { onConflict: 'id', ignoreDuplicates: true },
+  )
   if (error) throw error
-  return parsePlace(data)
 }

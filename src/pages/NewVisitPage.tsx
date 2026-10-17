@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
-import { ChevronLeft } from 'lucide-react'
-import { createPlace } from '../data/places'
+import { Link, useNavigate, useSearchParams } from 'react-router'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useMembers } from '../auth/members-context'
+import { createPlace, listPlaces } from '../data/places'
 import { uploadPhoto } from '../data/photos'
-import { submitReview } from '../data/reviews'
+import { listReviewAuthors, submitReview } from '../data/reviews'
 import { getWish, removeWish } from '../data/wishlist'
 import { ReviewForm } from '../features/review/ReviewForm'
 import { PlaceStep } from '../features/visit/PlaceStep'
+import { pendingForMe } from '../features/visit/pendingForMe'
 import { submitVisit } from '../features/visit/submitVisit'
 import { clearDraft, emptyDraft, loadDraft, NEW_VISIT_DRAFT, saveDraft, type VisitDraft } from '../lib/draft'
 import { todayIso } from '../lib/geo'
 import { compressImage } from '../lib/image'
+import { useLoad } from '../lib/useLoad'
 import visit from '../features/visit/visit.module.css'
 import styles from './page.module.css'
 
@@ -18,8 +21,15 @@ function formatShortDate(iso: string): string {
   return new Date(`${iso}T12:00:00`).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })
 }
 
+async function loadPending(userId: string) {
+  const [places, authors] = await Promise.all([listPlaces(), listReviewAuthors()])
+  return pendingForMe(places, authors, userId, todayIso())
+}
+
 export function NewVisitPage() {
   const navigate = useNavigate()
+  const { userId, partner } = useMembers()
+  const pending = useLoad(() => loadPending(userId), userId)
   const [params] = useSearchParams()
   const wishId = params.get('wish')
   const [draft, setDraft] = useState<VisitDraft>(() => loadDraft(NEW_VISIT_DRAFT) ?? emptyDraft(todayIso()))
@@ -92,6 +102,20 @@ export function NewVisitPage() {
           </div>
         )}
       </header>
+
+      {step === 1 && !draft.placeId && pending.status === 'ready' && pending.data.length > 0 && (
+        <section className={visit.partnerPlaces}>
+          <h2>{partner?.nome ?? 'O outro'} já registrou</h2>
+          {pending.data.map((p) => (
+            <Link key={p.id} to={`/lugar/${p.id}`} className={visit.partnerPlace}>
+              <span>{p.nome}</span>
+              <span className={visit.go}>
+                avaliar <ChevronRight size={16} />
+              </span>
+            </Link>
+          ))}
+        </section>
+      )}
 
       {step === 1 ? (
         <PlaceStep

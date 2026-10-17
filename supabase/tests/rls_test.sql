@@ -74,6 +74,9 @@ do $$ begin
      or (select count(*) from public.tws_members) <> 0 then
     raise exception 'não membro não lê';
   end if;
+  if public.tws_review_count('00000000-0000-4000-b000-000000000001') <> 0 then
+    raise exception 'não membro não conta avaliações';
+  end if;
   begin
     insert into public.tws_wishlist (nome, tipo, criado_por) values ('Intruso', 'cafe', auth.uid());
     raise exception 'não membro não grava';

@@ -49,9 +49,7 @@ export function LoginPage() {
 
         {step === 'code' || step === 'verifying' ? (
           <form className={styles.form} onSubmit={verifyCode}>
-            <p className={styles.sent}>
-              Te mandamos um e-mail. Abre o link ou digita o código aqui. 💌
-            </p>
+            <p className={styles.sent}>Te mandamos um e-mail. Abre o link ou digita o código aqui. 💌</p>
             <label className="field">
               Código do e-mail
               <input

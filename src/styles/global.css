@@ -152,3 +152,22 @@ button {
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
 }
+
+.tws-tiles {
+  filter: saturate(0.35) sepia(0.12) brightness(1.04) contrast(0.92);
+}
+
+@media (prefers-color-scheme: dark) {
+  .tws-tiles {
+    filter: invert(1) hue-rotate(180deg) saturate(0.3) brightness(0.8) contrast(0.9);
+  }
+}
+
+.leaflet-container .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  color: var(--text-muted);
+}
+
+.leaflet-container .leaflet-control-attribution a {
+  color: var(--accent);
+}

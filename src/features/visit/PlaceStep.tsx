@@ -1,0 +1,149 @@
+import { useEffect, useState } from 'react'
+import { Coffee, LocateFixed, MapPin, UtensilsCrossed } from 'lucide-react'
+import { currentPosition, searchAddress, type AddressResult } from '../../lib/geo'
+import type { VisitDraft } from '../../lib/draft'
+import styles from './PlaceStep.module.css'
+
+type PlaceDraft = VisitDraft['place']
+
+type Props = {
+  value: PlaceDraft
+  onChange: (p: PlaceDraft) => void
+  onNext: () => void
+}
+
+const SEARCH_DEBOUNCE_MS = 400
+
+export function PlaceStep({ value, onChange, onNext }: Props) {
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<AddressResult[]>([])
+  const [locating, setLocating] = useState(false)
+  const [gpsFailed, setGpsFailed] = useState(false)
+  const hasLocation = value.lat !== null
+  const ready = value.nome.trim() !== '' && value.tipo !== null
+
+  useEffect(() => {
+    if (query.trim().length < 3) return
+    const controller = new AbortController()
+    const timer = setTimeout(() => {
+      searchAddress(query, controller.signal)
+        .then(setResults)
+        .catch(() => undefined)
+    }, SEARCH_DEBOUNCE_MS)
+    return () => {
+      clearTimeout(timer)
+      controller.abort()
+    }
+  }, [query])
+
+  async function useMyLocation() {
+    setLocating(true)
+    const coords = await currentPosition()
+    setLocating(false)
+    if (coords) onChange({ ...value, ...coords, endereco: null })
+    else setGpsFailed(true)
+  }
+
+  return (
+    <form
+      className={styles.step}
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (ready) onNext()
+      }}
+    >
+      <label className="field">
+        Nome do lugar
+        <input
+          className="input"
+          value={value.nome}
+          autoComplete="off"
+          onChange={(e) => onChange({ ...value, nome: e.target.value })}
+        />
+      </label>
+
+      <div className={styles.segmented} role="group" aria-label="Tipo">
+        <button
+          type="button"
+          className={styles.option}
+          aria-pressed={value.tipo === 'cafe'}
+          onClick={() => onChange({ ...value, tipo: 'cafe' })}
+        >
+          <Coffee size={18} strokeWidth={1.6} /> Café
+        </button>
+        <button
+          type="button"
+          className={styles.option}
+          aria-pressed={value.tipo === 'restaurante'}
+          onClick={() => onChange({ ...value, tipo: 'restaurante' })}
+        >
+          <UtensilsCrossed size={18} strokeWidth={1.6} /> Restaurante
+        </button>
+      </div>
+
+      <div className={styles.location}>
+        <span className="field">Onde fica</span>
+        {hasLocation ? (
+          <div className={styles.chosen}>
+            <MapPin size={16} />
+            <span>{value.endereco ?? 'Localização atual'}</span>
+            <button type="button" onClick={() => onChange({ ...value, lat: null, lng: null, endereco: null })}>
+              trocar
+            </button>
+          </div>
+        ) : (
+          <>
+            <button type="button" className="btn" onClick={useMyLocation} disabled={locating}>
+              <LocateFixed size={18} strokeWidth={1.6} />
+              {locating ? 'Procurando…' : 'Usar minha localização'}
+            </button>
+            {gpsFailed && <p className={`${styles.note} muted`}>Não consegui sua localização. Busca pelo endereço?</p>}
+            <input
+              className="input"
+              placeholder="Buscar endereço"
+              aria-label="Buscar endereço"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value)
+                if (e.target.value.trim().length < 3) setResults([])
+              }}
+            />
+            {results.length > 0 && (
+              <ul className={styles.results}>
+                {results.map((r) => (
+                  <li key={`${r.lat},${r.lng}`}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onChange({ ...value, lat: r.lat, lng: r.lng, endereco: r.label })
+                        setQuery('')
+                        setResults([])
+                      }}
+                    >
+                      {r.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className={`${styles.note} muted`}>Opcional. Sem localização, o lugar só não aparece no mapa.</p>
+          </>
+        )}
+      </div>
+
+      <label className="field">
+        Quando
+        <input
+          className="input"
+          type="date"
+          value={value.visitadoEm}
+          onChange={(e) => onChange({ ...value, visitadoEm: e.target.value })}
+        />
+      </label>
+
+      <button type="submit" className="btn btn-primary" disabled={!ready}>
+        Continuar
+      </button>
+    </form>
+  )
+}

@@ -57,3 +57,43 @@ test('parsePlace rejeita tipo desconhecido', () => {
     }),
   ).toThrow()
 })
+
+test('parsePlace lê as informações do Google salvas com o lugar', () => {
+  const google = {
+    placeId: 'g1',
+    mapsUrl: 'https://maps.google.com/?cid=1',
+    site: null,
+    telefone: '(11) 3333-4444',
+    horarios: ['segunda-feira: Fechado'],
+    nivelPreco: 2,
+    nota: 4.6,
+    totalAvaliacoes: 12,
+  }
+  const place = parsePlace({
+    id: 'p1',
+    nome: 'Café Lumi',
+    tipo: 'cafe',
+    endereco: null,
+    lat: null,
+    lng: null,
+    visitado_em: '2026-10-16',
+    criado_por: 'u1',
+    google,
+  })
+  expect(place.google).toEqual(google)
+})
+
+test('parsePlace aceita lugar sem Google', () => {
+  const place = parsePlace({
+    id: 'p1',
+    nome: 'Café Lumi',
+    tipo: 'cafe',
+    endereco: null,
+    lat: null,
+    lng: null,
+    visitado_em: '2026-10-16',
+    criado_por: 'u1',
+    google: null,
+  })
+  expect(place.google).toBeNull()
+})

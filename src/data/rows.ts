@@ -1,4 +1,4 @@
-import type { Member, Place, PlaceKind, Review, Score, WishItem } from '../lib/types'
+import type { GoogleInfo, Member, Place, PlaceKind, PriceLevel, Review, Score, WishItem } from '../lib/types'
 
 type Row = Record<string, unknown>
 
@@ -39,6 +39,30 @@ function kind(row: Row): PlaceKind {
   return v
 }
 
+function priceLevel(row: Row): PriceLevel | null {
+  const v = row.nivelPreco
+  if (v === null || v === undefined) return null
+  if (v !== 1 && v !== 2 && v !== 3 && v !== 4) throw new Error('Nível de preço inválido')
+  return v
+}
+
+function googleInfo(value: unknown): GoogleInfo | null {
+  if (value === null || value === undefined) return null
+  const row = asRow(value)
+  const horarios = row.horarios
+  if (!Array.isArray(horarios) || !horarios.every((h) => typeof h === 'string')) throw new Error('Horários inválidos')
+  return {
+    placeId: str(row, 'placeId'),
+    mapsUrl: optStr(row, 'mapsUrl'),
+    site: optStr(row, 'site'),
+    telefone: optStr(row, 'telefone'),
+    horarios,
+    nivelPreco: priceLevel(row),
+    nota: optNum(row, 'nota'),
+    totalAvaliacoes: optNum(row, 'totalAvaliacoes'),
+  }
+}
+
 export function parsePlace(value: unknown): Place {
   const row = asRow(value)
   return {
@@ -50,6 +74,7 @@ export function parsePlace(value: unknown): Place {
     lng: optNum(row, 'lng'),
     visitadoEm: str(row, 'visitado_em'),
     criadoPor: str(row, 'criado_por'),
+    google: googleInfo(row.google),
   }
 }
 

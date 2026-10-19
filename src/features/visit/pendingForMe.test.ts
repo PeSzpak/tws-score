@@ -10,6 +10,7 @@ const place = (id: string, criadoPor: string, visitadoEm: string): Place => ({
   lng: null,
   visitadoEm,
   criadoPor,
+  google: null,
 })
 
 const today = '2026-10-16'

@@ -64,6 +64,7 @@ test('mostra o lugar que a parceira acabou de registrar para avaliar o mesmo', a
       lng: null,
       visitadoEm: '2026-10-16',
       criadoPor: 'u2',
+      google: null,
     },
   ]
   render(<NewVisitPage />, { wrapper: MemoryRouter })

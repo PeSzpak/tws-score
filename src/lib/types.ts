@@ -17,6 +17,19 @@ export type Member = {
   userId: string | null
 }
 
+export type PriceLevel = 1 | 2 | 3 | 4
+
+export type GoogleInfo = {
+  placeId: string
+  mapsUrl: string | null
+  site: string | null
+  telefone: string | null
+  horarios: string[]
+  nivelPreco: PriceLevel | null
+  nota: number | null
+  totalAvaliacoes: number | null
+}
+
 export type Place = {
   id: string
   nome: string
@@ -26,6 +39,7 @@ export type Place = {
   lng: number | null
   visitadoEm: string
   criadoPor: string
+  google: GoogleInfo | null
 }
 
 export type Review = {

@@ -30,6 +30,7 @@ export async function createPlace(input: NewPlace): Promise<void> {
       lat: input.lat,
       lng: input.lng,
       visitado_em: input.visitadoEm,
+      google: input.google,
       criado_por: await currentUserId(),
     },
     { onConflict: 'id', ignoreDuplicates: true },

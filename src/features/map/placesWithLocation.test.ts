@@ -10,6 +10,7 @@ const base: Place = {
   lng: -46.6,
   visitadoEm: '2026-10-16',
   criadoPor: 'u1',
+  google: null,
 }
 
 test('lugar sem localização fica fora do mapa', () => {

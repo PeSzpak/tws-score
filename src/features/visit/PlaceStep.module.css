@@ -82,6 +82,18 @@
   font-size: 14px;
 }
 
+.results strong {
+  display: block;
+  font-weight: 500;
+}
+
+.detail {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
 .results li:last-child button {
   border-bottom: 0;
 }

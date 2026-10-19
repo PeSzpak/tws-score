@@ -8,6 +8,7 @@ import { getPlace } from '../data/places'
 import { listReviewAuthors, listVisibleReviews, submitReview } from '../data/reviews'
 import { KindIcon } from '../features/home/PlaceCard'
 import place from '../features/place/place.module.css'
+import { GoogleInfoCard } from '../features/place/GoogleInfoCard'
 import { PhotoGallery } from '../features/place/PhotoGallery'
 import { RevealCards } from '../features/place/RevealCards'
 import { ReviewForm, type ReviewFormValue } from '../features/review/ReviewForm'
@@ -143,6 +144,8 @@ export function PlacePage() {
         )}
 
         <PhotoGallery urls={data.data.photos} uploading={busy} onAdd={addPhotos} />
+
+        {p.google && <GoogleInfoCard nome={p.nome} info={p.google} />}
 
         {p.lat !== null && p.lng !== null && (
           <Suspense>

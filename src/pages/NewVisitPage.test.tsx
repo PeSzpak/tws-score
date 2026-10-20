@@ -72,3 +72,22 @@ test('mostra o lugar que a parceira acabou de registrar para avaliar o mesmo', a
   expect(screen.getByRole('link', { name: /Café Lumi/ })).toHaveAttribute('href', '/lugar/p9')
   places.list = []
 })
+
+test('nova visita pelo + não herda o nome de um item da lista que não foi avaliado', () => {
+  const base = emptyDraft('2026-10-16')
+  saveDraft(NEW_VISIT_DRAFT, { ...base, wishId: 'w1', place: { ...base.place, nome: 'Café da Lista', tipo: 'cafe' } })
+  render(<NewVisitPage />, { wrapper: MemoryRouter })
+  expect(screen.getByLabelText('Nome do lugar')).toHaveValue('')
+})
+
+test('rascunho de item da lista com avaliação em andamento continua salvo', () => {
+  const base = emptyDraft('2026-10-16')
+  saveDraft(NEW_VISIT_DRAFT, {
+    ...base,
+    wishId: 'w1',
+    place: { ...base.place, nome: 'Café da Lista', tipo: 'cafe' },
+    scores: { notaGeral: 5 },
+  })
+  render(<NewVisitPage />, { wrapper: MemoryRouter })
+  expect(screen.getByLabelText('Nome do lugar')).toHaveValue('Café da Lista')
+})

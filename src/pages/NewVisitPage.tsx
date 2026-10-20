@@ -17,6 +17,16 @@ import { useLoad } from '../lib/useLoad'
 import visit from '../features/visit/visit.module.css'
 import styles from './page.module.css'
 
+function isUntouchedWishDraft(d: VisitDraft): boolean {
+  return d.wishId !== null && d.placeId === null && Object.keys(d.scores).length === 0 && !d.comentario.trim()
+}
+
+function initialDraft(wishId: string | null): VisitDraft {
+  const stored = loadDraft(NEW_VISIT_DRAFT)
+  if (stored && !wishId && isUntouchedWishDraft(stored)) return emptyDraft(todayIso())
+  return stored ?? emptyDraft(todayIso())
+}
+
 function formatShortDate(iso: string): string {
   return new Date(`${iso}T12:00:00`).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })
 }
@@ -32,7 +42,7 @@ export function NewVisitPage() {
   const pending = useLoad(() => loadPending(userId), userId)
   const [params] = useSearchParams()
   const wishId = params.get('wish')
-  const [draft, setDraft] = useState<VisitDraft>(() => loadDraft(NEW_VISIT_DRAFT) ?? emptyDraft(todayIso()))
+  const [draft, setDraft] = useState<VisitDraft>(() => initialDraft(wishId))
   const [step, setStep] = useState<1 | 2>(draft.placeId ? 2 : 1)
   const [photos, setPhotos] = useState<File[]>([])
   const [submitting, setSubmitting] = useState(false)

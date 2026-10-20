@@ -71,7 +71,9 @@ button {
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface);
+  color: var(--text);
   font-weight: 500;
+  text-decoration: none;
   transition:
     transform 150ms ease,
     opacity 150ms ease;
@@ -107,6 +109,7 @@ button {
 
 .input {
   width: 100%;
+  min-width: 0;
   min-height: 48px;
   padding: 12px 16px;
   border: 1px solid var(--border);
@@ -114,6 +117,18 @@ button {
   background: var(--surface);
   color: var(--text);
   font-size: 16px;
+}
+
+input[type='date'].input {
+  display: block;
+  min-width: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: left;
+}
+
+.input::-webkit-date-and-time-value {
+  text-align: left;
 }
 
 .input:focus {

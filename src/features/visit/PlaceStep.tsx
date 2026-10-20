@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Coffee, LocateFixed, MapPin, UtensilsCrossed } from 'lucide-react'
 import { currentPosition, searchAddress, type AddressResult } from '../../lib/geo'
-import { googleEnabled, placeDetails, searchPlaces, type Suggestion } from '../../lib/google'
+import { PlaceNameField } from '../../components/PlaceNameField'
 import type { VisitDraft } from '../../lib/draft'
 import styles from './PlaceStep.module.css'
 
@@ -18,9 +18,6 @@ const SEARCH_DEBOUNCE_MS = 400
 export function PlaceStep({ value, onChange, onNext }: Props) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<AddressResult[]>([])
-  const [nameQuery, setNameQuery] = useState('')
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
-  const sessionToken = useRef(crypto.randomUUID())
   const [locating, setLocating] = useState(false)
   const [gpsFailed, setGpsFailed] = useState(false)
   const hasLocation = value.lat !== null
@@ -40,40 +37,6 @@ export function PlaceStep({ value, onChange, onNext }: Props) {
     }
   }, [query])
 
-  useEffect(() => {
-    if (!googleEnabled || nameQuery.trim().length < 3) return
-    const controller = new AbortController()
-    const timer = setTimeout(() => {
-      searchPlaces(nameQuery, sessionToken.current, controller.signal)
-        .then(setSuggestions)
-        .catch(() => undefined)
-    }, SEARCH_DEBOUNCE_MS)
-    return () => {
-      clearTimeout(timer)
-      controller.abort()
-    }
-  }, [nameQuery])
-
-  async function pickSuggestion(s: Suggestion) {
-    setNameQuery('')
-    setSuggestions([])
-    const token = sessionToken.current
-    sessionToken.current = crypto.randomUUID()
-    try {
-      const found = await placeDetails(s.placeId, token)
-      onChange({
-        nome: found.nome || s.nome,
-        endereco: found.endereco,
-        lat: found.lat,
-        lng: found.lng,
-        google: found.google,
-        ...(found.tipo ? { tipo: found.tipo } : {}),
-      })
-    } catch {
-      onChange({ nome: s.nome })
-    }
-  }
-
   async function useMyLocation() {
     setLocating(true)
     const coords = await currentPosition()
@@ -90,33 +53,11 @@ export function PlaceStep({ value, onChange, onNext }: Props) {
         if (ready) onNext()
       }}
     >
-      <div className={styles.location}>
-        <label className="field">
-          Nome do lugar
-          <input
-            className="input"
-            value={value.nome}
-            autoComplete="off"
-            onChange={(e) => {
-              onChange({ nome: e.target.value })
-              setNameQuery(e.target.value)
-              if (e.target.value.trim().length < 3) setSuggestions([])
-            }}
-          />
-        </label>
-        {suggestions.length > 0 && (
-          <ul className={styles.results} aria-label="Sugestões do Google">
-            {suggestions.map((s) => (
-              <li key={s.placeId}>
-                <button type="button" onClick={() => pickSuggestion(s)}>
-                  <strong>{s.nome}</strong>
-                  {s.detalhe && <span className={styles.detail}>{s.detalhe}</span>}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <PlaceNameField
+        value={value.nome}
+        onChange={(nome) => onChange({ nome })}
+        onPick={({ tipo, ...found }) => onChange({ ...found, ...(tipo ? { tipo } : {}) })}
+      />
 
       <div className={styles.segmented} role="group" aria-label="Tipo">
         <button

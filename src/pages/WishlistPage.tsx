@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
-import { MapPin, X } from 'lucide-react'
+import { ChevronDown, MapPin, Star, X } from 'lucide-react'
 import { LoadError } from '../components/LoadError'
 import { PlaceNameField } from '../components/PlaceNameField'
 import { addWish, listWishes, removeWish } from '../data/wishlist'
 import { KindIcon } from '../features/home/PlaceCard'
+import { GoogleInfoCard } from '../features/place/GoogleInfoCard'
 import type { GooglePlace } from '../lib/google'
 import styles from '../features/wishlist/wishlist.module.css'
 import type { PlaceKind, WishItem } from '../lib/types'
@@ -19,6 +20,7 @@ export function WishlistPage() {
   const [observacao, setObservacao] = useState('')
   const [picked, setPicked] = useState<Omit<GooglePlace, 'nome' | 'tipo'> | null>(null)
   const [confirming, setConfirming] = useState<string | null>(null)
+  const [open, setOpen] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   function fetchItems() {
@@ -125,9 +127,29 @@ export function WishlistPage() {
               <span className={styles.icon}>
                 <KindIcon tipo={item.tipo} size={20} />
               </span>
-              <div>
-                <div className={styles.name}>{item.nome}</div>
+              <div className={styles.text}>
+                {item.google ? (
+                  <button
+                    type="button"
+                    className={styles.toggle}
+                    aria-expanded={open === item.id}
+                    onClick={() => setOpen((id) => (id === item.id ? null : item.id))}
+                  >
+                    <span className={styles.name}>{item.nome}</span>
+                    <ChevronDown size={16} className={styles.chevron} aria-hidden />
+                  </button>
+                ) : (
+                  <div className={styles.name}>{item.nome}</div>
+                )}
                 {item.observacao && <p className={`${styles.note} muted`}>{item.observacao}</p>}
+                {item.endereco && <p className={`${styles.address} muted`}>{item.endereco}</p>}
+                {item.google?.nota != null && (
+                  <p className={`${styles.address} muted`}>
+                    <Star size={12} strokeWidth={1.6} aria-hidden /> {item.google.nota.toLocaleString('pt-BR')} no
+                    Google
+                    {item.google.nivelPreco !== null && ` · ${'$'.repeat(item.google.nivelPreco)}`}
+                  </p>
+                )}
               </div>
               <div className={styles.actions}>
                 <button className={`btn ${styles.went}`} onClick={() => navigate(`/novo?wish=${item.id}`)}>
@@ -141,6 +163,11 @@ export function WishlistPage() {
                   <X size={18} />
                 </button>
               </div>
+              {open === item.id && item.google && (
+                <div className={styles.details}>
+                  <GoogleInfoCard nome={item.nome} info={item.google} />
+                </div>
+              )}
               {confirming === item.id && (
                 <div className={styles.confirm}>
                   <span className="muted">Tirar da lista?</span>

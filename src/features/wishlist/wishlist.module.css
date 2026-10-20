@@ -1,5 +1,6 @@
 .form {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   margin-bottom: 24px;
   padding: 16px;
@@ -39,7 +40,7 @@
 
 .item {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
   padding: 14px 14px 14px 16px;
@@ -137,4 +138,43 @@
   background: none;
   color: var(--text-muted);
   font-size: 13px;
+}
+
+.text {
+  min-width: 0;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+}
+
+.chevron {
+  flex: none;
+  color: var(--text-muted);
+  transition: transform 150ms ease;
+}
+
+.toggle[aria-expanded='true'] .chevron {
+  transform: rotate(180deg);
+}
+
+.address {
+  margin: 4px 0 0;
+  font-size: 12px;
+}
+
+.address svg {
+  vertical-align: -1px;
+}
+
+.details {
+  grid-column: 1 / -1;
+  padding-top: 4px;
 }

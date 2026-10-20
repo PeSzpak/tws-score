@@ -131,3 +131,24 @@ test('adicionar só com o nome digitado continua funcionando', async () => {
     expect.objectContaining({ nome: 'Padaria', endereco: null, lat: null, lng: null, google: null }),
   )
 })
+
+test('item da lista mostra endereço e abre cardápio e horários antes da visita', async () => {
+  wishes.list = [
+    {
+      id: 'w3',
+      nome: 'Taisho Sushi',
+      tipo: 'restaurante',
+      observacao: null,
+      endereco: 'Av. Iguaçu, 1848 - Água Verde, Curitiba',
+      lat: -25.44,
+      lng: -49.27,
+      google: { ...info, site: 'https://taisho.com.br', horarios: ['terça-feira: 18:00–23:00'] },
+    },
+  ]
+  renderPage()
+  expect(await screen.findByText('Av. Iguaçu, 1848 - Água Verde, Curitiba')).toBeInTheDocument()
+  expect(screen.queryByRole('link', { name: /Cardápio e site/ })).not.toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'Taisho Sushi' }))
+  expect(screen.getByRole('link', { name: /Cardápio e site/ })).toHaveAttribute('href', 'https://taisho.com.br')
+  expect(screen.getByText('terça-feira: 18:00–23:00')).toBeInTheDocument()
+})

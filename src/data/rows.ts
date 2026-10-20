@@ -113,5 +113,9 @@ export function parseWish(value: unknown): WishItem {
     nome: str(row, 'nome'),
     tipo: kind(row),
     observacao: optStr(row, 'observacao'),
+    endereco: optStr(row, 'endereco'),
+    lat: optNum(row, 'lat'),
+    lng: optNum(row, 'lng'),
+    google: googleInfo(row.google),
   }
 }

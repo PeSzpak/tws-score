@@ -1,9 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
-import { X } from 'lucide-react'
+import { MapPin, X } from 'lucide-react'
 import { LoadError } from '../components/LoadError'
+import { PlaceNameField } from '../components/PlaceNameField'
 import { addWish, listWishes, removeWish } from '../data/wishlist'
 import { KindIcon } from '../features/home/PlaceCard'
+import type { GooglePlace } from '../lib/google'
 import styles from '../features/wishlist/wishlist.module.css'
 import type { PlaceKind, WishItem } from '../lib/types'
 import page from './page.module.css'
@@ -15,6 +17,7 @@ export function WishlistPage() {
   const [nome, setNome] = useState('')
   const [tipo, setTipo] = useState<PlaceKind>('cafe')
   const [observacao, setObservacao] = useState('')
+  const [picked, setPicked] = useState<Omit<GooglePlace, 'nome' | 'tipo'> | null>(null)
   const [confirming, setConfirming] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -35,10 +38,19 @@ export function WishlistPage() {
     if (!nome.trim()) return
     setSaving(true)
     try {
-      const item = await addWish({ nome: nome.trim(), tipo, observacao: observacao.trim() || null })
+      const item = await addWish({
+        nome: nome.trim(),
+        tipo,
+        observacao: observacao.trim() || null,
+        endereco: picked?.endereco ?? null,
+        lat: picked?.lat ?? null,
+        lng: picked?.lng ?? null,
+        google: picked?.google ?? null,
+      })
       setItems((list) => [item, ...(list ?? [])])
       setNome('')
       setObservacao('')
+      setPicked(null)
     } catch {
       setFailed(true)
     } finally {
@@ -59,10 +71,24 @@ export function WishlistPage() {
       </header>
 
       <form className={styles.form} onSubmit={add}>
-        <label className="field">
-          Nome do lugar
-          <input className="input" value={nome} onChange={(e) => setNome(e.target.value)} autoComplete="off" />
-        </label>
+        <PlaceNameField
+          value={nome}
+          onChange={setNome}
+          onPick={({ nome: found, tipo: kind, ...rest }) => {
+            setNome(found)
+            if (kind) setTipo(kind)
+            setPicked(rest)
+          }}
+        />
+        {picked?.endereco && (
+          <div className={styles.picked}>
+            <MapPin size={14} />
+            <span>{picked.endereco}</span>
+            <button type="button" onClick={() => setPicked(null)}>
+              tirar
+            </button>
+          </div>
+        )}
         <div className={styles.kinds} role="group" aria-label="Tipo">
           <button type="button" className={styles.kind} aria-pressed={tipo === 'cafe'} onClick={() => setTipo('cafe')}>
             Café

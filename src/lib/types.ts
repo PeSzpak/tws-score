@@ -56,6 +56,10 @@ export type WishItem = {
   nome: string
   tipo: PlaceKind
   observacao: string | null
+  endereco: string | null
+  lat: number | null
+  lng: number | null
+  google: GoogleInfo | null
 }
 
 export type ReviewState =

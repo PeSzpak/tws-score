@@ -55,7 +55,8 @@ export function NewVisitPage() {
     getWish(wishId).then((wish) => {
       if (!wish) return
       const base = emptyDraft(todayIso())
-      setDraft({ ...base, wishId: wish.id, place: { ...base.place, nome: wish.nome, tipo: wish.tipo } })
+      const { id, observacao: _, ...place } = wish
+      setDraft({ ...base, wishId: id, place: { ...base.place, ...place } })
       setStep(1)
     })
   }, [wishId, draft.wishId])

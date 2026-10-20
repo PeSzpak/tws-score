@@ -1,4 +1,4 @@
-import { parsePlace, parseReview } from './rows'
+import { parsePlace, parseReview, parseWish } from './rows'
 
 const reviewRow = {
   id: 'r1',
@@ -96,4 +96,27 @@ test('parsePlace aceita lugar sem Google', () => {
     google: null,
   })
   expect(place.google).toBeNull()
+})
+
+test('parseWish lê endereço, localização e Google do item da lista', () => {
+  const wish = parseWish({
+    id: 'w1',
+    nome: 'Café Lumi',
+    tipo: 'cafe',
+    observacao: null,
+    endereco: 'Rua Augusta, 100',
+    lat: -23.55,
+    lng: -46.65,
+    google: null,
+  })
+  expect(wish).toEqual({
+    id: 'w1',
+    nome: 'Café Lumi',
+    tipo: 'cafe',
+    observacao: null,
+    endereco: 'Rua Augusta, 100',
+    lat: -23.55,
+    lng: -46.65,
+    google: null,
+  })
 })

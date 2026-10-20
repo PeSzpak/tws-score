@@ -1,6 +1,6 @@
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { MemoryRouter, Route, Routes } from 'react-router'
 import { emptyDraft, NEW_VISIT_DRAFT, saveDraft } from '../lib/draft'
 import { NewVisitPage } from './NewVisitPage'
 
@@ -8,7 +8,8 @@ const places = vi.hoisted(() => ({ list: [] as import('../lib/types').Place[] })
 vi.mock('../data/places', () => ({ createPlace: vi.fn(), listPlaces: () => Promise.resolve(places.list) }))
 vi.mock('../data/reviews', () => ({ submitReview: vi.fn(), listReviewAuthors: () => Promise.resolve(new Map()) }))
 vi.mock('../data/photos', () => ({ uploadPhoto: vi.fn() }))
-vi.mock('../data/wishlist', () => ({ getWish: vi.fn(), removeWish: vi.fn() }))
+const wish = vi.hoisted(() => ({ getWish: vi.fn(), listWishes: vi.fn(() => Promise.resolve([])) }))
+vi.mock('../data/wishlist', () => ({ ...wish, removeWish: vi.fn() }))
 vi.mock('../auth/members-context', () => ({ useMembers: () => ({ userId: 'u1', me: {}, partner: { nome: 'Belle' } }) }))
 
 const gps = vi.hoisted(() => ({ resolve: (() => {}) as (coords: unknown) => void }))
@@ -90,4 +91,26 @@ test('rascunho de item da lista com avaliação em andamento continua salvo', ()
   })
   render(<NewVisitPage />, { wrapper: MemoryRouter })
   expect(screen.getByLabelText('Nome do lugar')).toHaveValue('Café da Lista')
+})
+
+test('Fomos! traz endereço e localização guardados no item da lista', async () => {
+  wish.getWish.mockResolvedValue({
+    id: 'w1',
+    nome: 'Café Lumi',
+    tipo: 'cafe',
+    observacao: null,
+    endereco: 'Rua Augusta, 100',
+    lat: -23.55,
+    lng: -46.65,
+    google: null,
+  })
+  render(
+    <MemoryRouter initialEntries={['/novo?wish=w1']}>
+      <Routes>
+        <Route path="/novo" element={<NewVisitPage />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+  expect(await screen.findByText('Rua Augusta, 100')).toBeInTheDocument()
+  expect(screen.getByLabelText('Nome do lugar')).toHaveValue('Café Lumi')
 })

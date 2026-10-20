@@ -8,7 +8,7 @@ const places = vi.hoisted(() => ({ list: [] as import('../lib/types').Place[] })
 vi.mock('../data/places', () => ({ createPlace: vi.fn(), listPlaces: () => Promise.resolve(places.list) }))
 vi.mock('../data/reviews', () => ({ submitReview: vi.fn(), listReviewAuthors: () => Promise.resolve(new Map()) }))
 vi.mock('../data/photos', () => ({ uploadPhoto: vi.fn() }))
-const wish = vi.hoisted(() => ({ getWish: vi.fn(), listWishes: vi.fn(() => Promise.resolve([])) }))
+const wish = vi.hoisted(() => ({ getWish: vi.fn(), listWishes: vi.fn(() => Promise.resolve([] as import('../lib/types').WishItem[])) }))
 vi.mock('../data/wishlist', () => ({ ...wish, removeWish: vi.fn() }))
 vi.mock('../auth/members-context', () => ({ useMembers: () => ({ userId: 'u1', me: {}, partner: { nome: 'Belle' } }) }))
 
@@ -113,4 +113,22 @@ test('Fomos! traz endereço e localização guardados no item da lista', async (
   )
   expect(await screen.findByText('Rua Augusta, 100')).toBeInTheDocument()
   expect(screen.getByLabelText('Nome do lugar')).toHaveValue('Café Lumi')
+})
+
+test('mostra os lugares da lista Queremos ir como atalho', async () => {
+  wish.listWishes.mockResolvedValueOnce([
+    {
+      id: 'w1',
+      nome: 'Cantina Roma',
+      tipo: 'restaurante',
+      observacao: null,
+      endereco: null,
+      lat: null,
+      lng: null,
+      google: null,
+    },
+  ])
+  render(<NewVisitPage />, { wrapper: MemoryRouter })
+  expect(await screen.findByText('Da lista Queremos ir')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: /Cantina Roma/ })).toHaveAttribute('href', '/novo?wish=w1')
 })

@@ -8,7 +8,10 @@ const places = vi.hoisted(() => ({ list: [] as import('../lib/types').Place[] })
 vi.mock('../data/places', () => ({ createPlace: vi.fn(), listPlaces: () => Promise.resolve(places.list) }))
 vi.mock('../data/reviews', () => ({ submitReview: vi.fn(), listReviewAuthors: () => Promise.resolve(new Map()) }))
 vi.mock('../data/photos', () => ({ uploadPhoto: vi.fn() }))
-const wish = vi.hoisted(() => ({ getWish: vi.fn(), listWishes: vi.fn(() => Promise.resolve([] as import('../lib/types').WishItem[])) }))
+const wish = vi.hoisted(() => ({
+  getWish: vi.fn(),
+  listWishes: vi.fn(() => Promise.resolve([] as import('../lib/types').WishItem[])),
+}))
 vi.mock('../data/wishlist', () => ({ ...wish, removeWish: vi.fn() }))
 vi.mock('../auth/members-context', () => ({ useMembers: () => ({ userId: 'u1', me: {}, partner: { nome: 'Belle' } }) }))
 

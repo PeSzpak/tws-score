@@ -153,6 +153,19 @@ button {
   box-shadow: var(--shadow);
 }
 
+.tws-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.tws-popup .leaflet-popup-content {
+  width: auto !important;
+  margin: 0;
+  font-size: inherit;
+  line-height: 1.4;
+}
+
 .tws-tiles {
   filter: saturate(0.35) sepia(0.12) brightness(1.04) contrast(0.92);
 }

@@ -1,4 +1,3 @@
-import 'leaflet/dist/leaflet.css'
 import { useEffect, useMemo } from 'react'
 import L from 'leaflet'
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
@@ -9,7 +8,7 @@ import { MapCard } from '../features/map/MapCard'
 import styles from '../features/map/map.module.css'
 import { placesWithLocation, type LocatedPlace } from '../features/map/placesWithLocation'
 import { reviewState } from '../lib/rating'
-import { TILE_ATTRIBUTION, TILE_CLASS, tileUrl } from '../lib/tiles'
+import { TILE_OPTIONS } from '../lib/tiles'
 import { useLoad } from '../lib/useLoad'
 
 const BRAZIL: [number, number] = [-14.2, -51.9]
@@ -33,7 +32,7 @@ export function MapPage() {
     <main>
       <h1 className={styles.title}>Mapa</h1>
       <MapContainer center={BRAZIL} zoom={4} className={styles.map} zoomControl={false}>
-        <TileLayer url={tileUrl()} attribution={TILE_ATTRIBUTION} className={TILE_CLASS} />
+        <TileLayer {...TILE_OPTIONS} />
         <FitBounds places={places} />
         {places.map((p) => (
           <Marker key={p.id} position={[p.lat, p.lng]} icon={pinIcon}>

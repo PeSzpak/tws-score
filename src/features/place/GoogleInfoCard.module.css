@@ -46,3 +46,38 @@
   display: grid;
   gap: 8px;
 }
+
+.week {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  font-size: 14px;
+}
+
+.week > div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+
+.week dt {
+  color: var(--text-muted);
+}
+
+.week dd {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.week .today {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.week .today dt {
+  color: var(--text);
+  font-weight: 600;
+}

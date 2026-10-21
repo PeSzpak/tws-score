@@ -39,3 +39,17 @@ test('sem site, o cardápio fica no Google Maps e some o que o lugar não tem', 
     'https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+Lumi&query_place_id=g1',
   )
 })
+
+test('horários mostram o de hoje e agrupam os dias iguais', () => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date(2026, 9, 21, 12))
+  const dias = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado', 'domingo']
+  const horarios = dias.map((d, i) => `${d}: ${i < 5 ? '11:30–14:30, 18:00–22:00' : '11:30–15:00'}`)
+  render(<GoogleInfoCard nome="Café Lumi" info={{ ...full, horarios }} />)
+  vi.useRealTimers()
+
+  expect(screen.getByText('Hoje: 11:30–14:30, 18:00–22:00')).toBeInTheDocument()
+  expect(screen.getByText('seg a sex')).toBeInTheDocument()
+  expect(screen.getByText('sáb e dom')).toBeInTheDocument()
+  expect(screen.queryByText(/segunda-feira/)).not.toBeInTheDocument()
+})

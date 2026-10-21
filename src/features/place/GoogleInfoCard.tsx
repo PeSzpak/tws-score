@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Clock, ExternalLink, MapPinned, Phone, Star } from 'lucide-react'
+import { groupHours, weekdayIndex } from '../../lib/hours'
 import type { GoogleInfo } from '../../lib/types'
 import styles from './GoogleInfoCard.module.css'
 
@@ -8,6 +10,39 @@ function mapsUrl(nome: string, info: GoogleInfo): string {
   if (info.mapsUrl) return info.mapsUrl
   const params = new URLSearchParams({ api: '1', query: nome, query_place_id: info.placeId })
   return `https://www.google.com/maps/search/?${params}`
+}
+
+function Hours({ horarios }: { horarios: string[] }) {
+  const [hoje] = useState(() => weekdayIndex(new Date()))
+  const groups = groupHours(horarios, hoje)
+  const today = groups?.find((g) => g.hoje)
+  return (
+    <details className={styles.hours}>
+      <summary>
+        <Clock size={14} strokeWidth={1.6} aria-hidden /> {today ? `Hoje: ${today.horas.join(', ')}` : 'Horários'}
+      </summary>
+      {groups ? (
+        <dl className={styles.week}>
+          {groups.map((g) => (
+            <div key={g.dias} className={g.hoje ? styles.today : undefined}>
+              <dt>{g.dias}</dt>
+              <dd>
+                {g.horas.map((h) => (
+                  <span key={h}>{h}</span>
+                ))}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : (
+        <ul>
+          {horarios.map((h) => (
+            <li key={h}>{h}</li>
+          ))}
+        </ul>
+      )}
+    </details>
+  )
 }
 
 export function GoogleInfoCard({ nome, info }: Props) {
@@ -27,18 +62,7 @@ export function GoogleInfoCard({ nome, info }: Props) {
         </p>
       )}
 
-      {info.horarios.length > 0 && (
-        <details className={styles.hours}>
-          <summary>
-            <Clock size={14} strokeWidth={1.6} aria-hidden /> Horários
-          </summary>
-          <ul>
-            {info.horarios.map((h) => (
-              <li key={h}>{h}</li>
-            ))}
-          </ul>
-        </details>
-      )}
+      {info.horarios.length > 0 && <Hours horarios={info.horarios} />}
 
       <div className={styles.actions}>
         {info.site && (

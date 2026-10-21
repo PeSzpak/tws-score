@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Coffee, LocateFixed, MapPin, UtensilsCrossed } from 'lucide-react'
 import { currentPosition, searchAddress, type AddressResult } from '../../lib/geo'
+import { PlaceNameField } from '../../components/PlaceNameField'
 import type { VisitDraft } from '../../lib/draft'
 import styles from './PlaceStep.module.css'
 
@@ -52,15 +53,11 @@ export function PlaceStep({ value, onChange, onNext }: Props) {
         if (ready) onNext()
       }}
     >
-      <label className="field">
-        Nome do lugar
-        <input
-          className="input"
-          value={value.nome}
-          autoComplete="off"
-          onChange={(e) => onChange({ nome: e.target.value })}
-        />
-      </label>
+      <PlaceNameField
+        value={value.nome}
+        onChange={(nome) => onChange({ nome })}
+        onPick={({ tipo, ...found }) => onChange({ ...found, ...(tipo ? { tipo } : {}) })}
+      />
 
       <div className={styles.segmented} role="group" aria-label="Tipo">
         <button
@@ -87,7 +84,7 @@ export function PlaceStep({ value, onChange, onNext }: Props) {
           <div className={styles.chosen}>
             <MapPin size={16} />
             <span>{value.endereco ?? 'Localização atual'}</span>
-            <button type="button" onClick={() => onChange({ lat: null, lng: null, endereco: null })}>
+            <button type="button" onClick={() => onChange({ lat: null, lng: null, endereco: null, google: null })}>
               trocar
             </button>
           </div>

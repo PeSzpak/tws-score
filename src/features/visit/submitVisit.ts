@@ -28,7 +28,7 @@ export async function uploadPhotos(
 
 export async function submitVisit(draft: VisitDraft, photos: File[], deps: SubmitDeps): Promise<SubmitResult> {
   const scores = completeScores(draft.scores)
-  const { nome, tipo, endereco, lat, lng, visitadoEm } = draft.place
+  const { nome, tipo, endereco, lat, lng, visitadoEm, google } = draft.place
   if (!scores || !tipo || !nome.trim()) throw new Error('Rascunho incompleto')
 
   let placeId = draft.placeId
@@ -36,7 +36,7 @@ export async function submitVisit(draft: VisitDraft, photos: File[], deps: Submi
     placeId = deps.newId()
     deps.saveDraft({ ...draft, placeId })
   }
-  await deps.createPlace({ id: placeId, nome: nome.trim(), tipo, endereco, lat, lng, visitadoEm })
+  await deps.createPlace({ id: placeId, nome: nome.trim(), tipo, endereco, lat, lng, visitadoEm, google })
 
   await deps.submitReview(placeId, scores, draft.comentario.trim() || null)
   const photoErrors = await uploadPhotos(placeId, photos, deps)

@@ -1,9 +1,15 @@
-const dark = () => window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
-
 export function tileUrl(): string {
-  const style = dark() ? 'dark_all' : 'light_all'
-  return `https://{s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}{r}.png`
+  return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
 }
 
-export const TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+export const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+
+export const TILE_CLASS = 'tws-tiles'
+
+export const TILE_OPTIONS = {
+  url: tileUrl(),
+  attribution: TILE_ATTRIBUTION,
+  className: TILE_CLASS,
+  updateWhenIdle: false,
+  keepBuffer: 4,
+}

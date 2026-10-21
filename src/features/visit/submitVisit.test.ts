@@ -70,6 +70,23 @@ test('lugar sem localização é salvo com coordenadas nulas', async () => {
   expect(d.createPlace).toHaveBeenCalledWith(expect.objectContaining({ lat: null, lng: null }))
 })
 
+test('informações do Google vão junto com o lugar', async () => {
+  const d = deps()
+  const base = draft()
+  const google = {
+    placeId: 'g1',
+    mapsUrl: null,
+    site: null,
+    telefone: null,
+    horarios: [],
+    nivelPreco: null,
+    nota: 4.5,
+    totalAvaliacoes: 10,
+  }
+  await submitVisit({ ...base, place: { ...base.place, google } }, [], d)
+  expect(d.createPlace).toHaveBeenCalledWith(expect.objectContaining({ google }))
+})
+
 test('item da lista queremos ir sai depois do envio', async () => {
   const d = deps()
   await submitVisit(draft({ wishId: 'w1' }), [], d)

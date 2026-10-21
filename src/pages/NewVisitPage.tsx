@@ -5,7 +5,8 @@ import { useMembers } from '../auth/members-context'
 import { createPlace, listPlaces } from '../data/places'
 import { uploadPhoto } from '../data/photos'
 import { listReviewAuthors, submitReview } from '../data/reviews'
-import { getWish, removeWish } from '../data/wishlist'
+import { getWish, listWishes, removeWish } from '../data/wishlist'
+import { KindIcon } from '../features/home/PlaceCard'
 import { ReviewForm } from '../features/review/ReviewForm'
 import { PlaceStep } from '../features/visit/PlaceStep'
 import { pendingForMe } from '../features/visit/pendingForMe'
@@ -17,22 +18,34 @@ import { useLoad } from '../lib/useLoad'
 import visit from '../features/visit/visit.module.css'
 import styles from './page.module.css'
 
+function isUntouchedWishDraft(d: VisitDraft): boolean {
+  return d.wishId !== null && d.placeId === null && Object.keys(d.scores).length === 0 && !d.comentario.trim()
+}
+
+function initialDraft(wishId: string | null): VisitDraft {
+  const stored = loadDraft(NEW_VISIT_DRAFT)
+  if (stored && !wishId && isUntouchedWishDraft(stored)) return emptyDraft(todayIso())
+  return stored ?? emptyDraft(todayIso())
+}
+
 function formatShortDate(iso: string): string {
   return new Date(`${iso}T12:00:00`).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })
 }
 
-async function loadPending(userId: string) {
-  const [places, authors] = await Promise.all([listPlaces(), listReviewAuthors()])
-  return pendingForMe(places, authors, userId, todayIso())
+const WISH_SHORTCUTS = 6
+
+async function loadShortcuts(userId: string) {
+  const [places, authors, wishes] = await Promise.all([listPlaces(), listReviewAuthors(), listWishes()])
+  return { pending: pendingForMe(places, authors, userId, todayIso()), wishes: wishes.slice(0, WISH_SHORTCUTS) }
 }
 
 export function NewVisitPage() {
   const navigate = useNavigate()
   const { userId, partner } = useMembers()
-  const pending = useLoad(() => loadPending(userId), userId)
+  const shortcuts = useLoad(() => loadShortcuts(userId), userId)
   const [params] = useSearchParams()
   const wishId = params.get('wish')
-  const [draft, setDraft] = useState<VisitDraft>(() => loadDraft(NEW_VISIT_DRAFT) ?? emptyDraft(todayIso()))
+  const [draft, setDraft] = useState<VisitDraft>(() => initialDraft(wishId))
   const [step, setStep] = useState<1 | 2>(draft.placeId ? 2 : 1)
   const [photos, setPhotos] = useState<File[]>([])
   const [submitting, setSubmitting] = useState(false)
@@ -45,7 +58,8 @@ export function NewVisitPage() {
     getWish(wishId).then((wish) => {
       if (!wish) return
       const base = emptyDraft(todayIso())
-      setDraft({ ...base, wishId: wish.id, place: { ...base.place, nome: wish.nome, tipo: wish.tipo } })
+      const { id, observacao: _, ...place } = wish
+      setDraft({ ...base, wishId: id, place: { ...base.place, ...place } })
       setStep(1)
     })
   }, [wishId, draft.wishId])
@@ -103,10 +117,10 @@ export function NewVisitPage() {
         )}
       </header>
 
-      {step === 1 && !draft.placeId && pending.status === 'ready' && pending.data.length > 0 && (
+      {step === 1 && !draft.placeId && shortcuts.status === 'ready' && shortcuts.data.pending.length > 0 && (
         <section className={visit.partnerPlaces}>
           <h2>{partner?.nome ?? 'O outro'} já registrou</h2>
-          {pending.data.map((p) => (
+          {shortcuts.data.pending.map((p) => (
             <Link key={p.id} to={`/lugar/${p.id}`} className={visit.partnerPlace}>
               <span>{p.nome}</span>
               <span className={visit.go}>
@@ -116,6 +130,24 @@ export function NewVisitPage() {
           ))}
         </section>
       )}
+
+      {step === 1 &&
+        !draft.placeId &&
+        !draft.wishId &&
+        shortcuts.status === 'ready' &&
+        shortcuts.data.wishes.length > 0 && (
+          <section className={visit.wishes}>
+            <h2>Da lista Queremos ir</h2>
+            <div className={visit.chips}>
+              {shortcuts.data.wishes.map((w) => (
+                <Link key={w.id} to={`/novo?wish=${w.id}`} className={visit.chip}>
+                  <KindIcon tipo={w.tipo} size={14} />
+                  {w.nome}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
       {step === 1 ? (
         <PlaceStep

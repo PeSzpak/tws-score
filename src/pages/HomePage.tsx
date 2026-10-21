@@ -2,11 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { useMembers } from '../auth/members-context'
 import { LoadError } from '../components/LoadError'
-import { listPhotoUrls } from '../data/photos'
-import { listPlaces } from '../data/places'
-import { listReviewAuthors, listVisibleReviews } from '../data/reviews'
 import { filterPlaces, type KindFilter } from '../features/home/filterPlaces'
 import home from '../features/home/home.module.css'
+import { loadOverview } from '../features/home/loadOverview'
 import { PlaceCard } from '../features/home/PlaceCard'
 import { reviewState } from '../lib/rating'
 import { useLoad } from '../lib/useLoad'
@@ -18,23 +16,11 @@ const FILTERS: { value: KindFilter; label: string }[] = [
   { value: 'restaurante', label: 'Restaurantes' },
 ]
 
-async function loadHome() {
-  const [places, authors, reviews, photos] = await Promise.all([
-    listPlaces(),
-    listReviewAuthors(),
-    listVisibleReviews(),
-    listPhotoUrls(),
-  ])
-  const covers = new Map<string, string>()
-  for (const p of photos) if (!covers.has(p.placeId)) covers.set(p.placeId, p.url)
-  return { places, authors, reviews, covers }
-}
-
 export function HomePage() {
   const { userId, partner } = useMembers()
   const [kind, setKind] = useState<KindFilter>('todos')
   const [query, setQuery] = useState('')
-  const home$ = useLoad(loadHome, 'home')
+  const home$ = useLoad(loadOverview, 'home')
 
   return (
     <main className={styles.page}>

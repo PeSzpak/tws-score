@@ -55,3 +55,34 @@
   font-family: var(--font-body);
   font-size: 14px;
 }
+
+.wishes {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.wishes h2 {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  text-decoration: none;
+}

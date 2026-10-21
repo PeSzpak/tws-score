@@ -29,7 +29,7 @@ export function Dots({ label, value, onChange }: Props) {
       ) : (
         <span className={styles.dots} role="img" aria-label={`${label}: ${value ?? 0} de 5`}>
           {[1, 2, 3, 4, 5].map((s) => (
-            <span key={s} className={styles.dotButton}>
+            <span key={s} className={styles.dotSlot}>
               <Dot filled={value !== null && s <= value} />
             </span>
           ))}

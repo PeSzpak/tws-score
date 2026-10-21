@@ -1,9 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
-import { X } from 'lucide-react'
+import { ChevronDown, MapPin, Star, X } from 'lucide-react'
 import { LoadError } from '../components/LoadError'
+import { PlaceNameField } from '../components/PlaceNameField'
 import { addWish, listWishes, removeWish } from '../data/wishlist'
 import { KindIcon } from '../features/home/PlaceCard'
+import { GoogleInfoCard } from '../features/place/GoogleInfoCard'
+import type { GooglePlace } from '../lib/google'
 import styles from '../features/wishlist/wishlist.module.css'
 import type { PlaceKind, WishItem } from '../lib/types'
 import page from './page.module.css'
@@ -15,7 +18,9 @@ export function WishlistPage() {
   const [nome, setNome] = useState('')
   const [tipo, setTipo] = useState<PlaceKind>('cafe')
   const [observacao, setObservacao] = useState('')
+  const [picked, setPicked] = useState<Omit<GooglePlace, 'nome' | 'tipo'> | null>(null)
   const [confirming, setConfirming] = useState<string | null>(null)
+  const [open, setOpen] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   function fetchItems() {
@@ -35,10 +40,19 @@ export function WishlistPage() {
     if (!nome.trim()) return
     setSaving(true)
     try {
-      const item = await addWish({ nome: nome.trim(), tipo, observacao: observacao.trim() || null })
+      const item = await addWish({
+        nome: nome.trim(),
+        tipo,
+        observacao: observacao.trim() || null,
+        endereco: picked?.endereco ?? null,
+        lat: picked?.lat ?? null,
+        lng: picked?.lng ?? null,
+        google: picked?.google ?? null,
+      })
       setItems((list) => [item, ...(list ?? [])])
       setNome('')
       setObservacao('')
+      setPicked(null)
     } catch {
       setFailed(true)
     } finally {
@@ -59,10 +73,24 @@ export function WishlistPage() {
       </header>
 
       <form className={styles.form} onSubmit={add}>
-        <label className="field">
-          Nome do lugar
-          <input className="input" value={nome} onChange={(e) => setNome(e.target.value)} autoComplete="off" />
-        </label>
+        <PlaceNameField
+          value={nome}
+          onChange={setNome}
+          onPick={({ nome: found, tipo: kind, ...rest }) => {
+            setNome(found)
+            if (kind) setTipo(kind)
+            setPicked(rest)
+          }}
+        />
+        {picked?.endereco && (
+          <div className={styles.picked}>
+            <MapPin size={14} />
+            <span>{picked.endereco}</span>
+            <button type="button" onClick={() => setPicked(null)}>
+              tirar
+            </button>
+          </div>
+        )}
         <div className={styles.kinds} role="group" aria-label="Tipo">
           <button type="button" className={styles.kind} aria-pressed={tipo === 'cafe'} onClick={() => setTipo('cafe')}>
             Café
@@ -99,9 +127,29 @@ export function WishlistPage() {
               <span className={styles.icon}>
                 <KindIcon tipo={item.tipo} size={20} />
               </span>
-              <div>
-                <div className={styles.name}>{item.nome}</div>
+              <div className={styles.text}>
+                {item.google ? (
+                  <button
+                    type="button"
+                    className={styles.toggle}
+                    aria-expanded={open === item.id}
+                    onClick={() => setOpen((id) => (id === item.id ? null : item.id))}
+                  >
+                    <span className={styles.name}>{item.nome}</span>
+                    <ChevronDown size={16} className={styles.chevron} aria-hidden />
+                  </button>
+                ) : (
+                  <div className={styles.name}>{item.nome}</div>
+                )}
                 {item.observacao && <p className={`${styles.note} muted`}>{item.observacao}</p>}
+                {item.endereco && <p className={`${styles.address} muted`}>{item.endereco}</p>}
+                {item.google?.nota != null && (
+                  <p className={`${styles.address} muted`}>
+                    <Star size={12} strokeWidth={1.6} aria-hidden /> {item.google.nota.toLocaleString('pt-BR')} no
+                    Google
+                    {item.google.nivelPreco !== null && ` · ${'$'.repeat(item.google.nivelPreco)}`}
+                  </p>
+                )}
               </div>
               <div className={styles.actions}>
                 <button className={`btn ${styles.went}`} onClick={() => navigate(`/novo?wish=${item.id}`)}>
@@ -115,6 +163,11 @@ export function WishlistPage() {
                   <X size={18} />
                 </button>
               </div>
+              {open === item.id && item.google && (
+                <div className={styles.details}>
+                  <GoogleInfoCard nome={item.nome} info={item.google} lat={item.lat} lng={item.lng} />
+                </div>
+              )}
               {confirming === item.id && (
                 <div className={styles.confirm}>
                   <span className="muted">Tirar da lista?</span>

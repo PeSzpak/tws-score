@@ -1,4 +1,4 @@
-import type { PlaceKind, Scores } from './types'
+import type { GoogleInfo, PlaceKind, Scores } from './types'
 
 export type VisitDraft = {
   placeId: string | null
@@ -10,6 +10,7 @@ export type VisitDraft = {
     lat: number | null
     lng: number | null
     visitadoEm: string
+    google: GoogleInfo | null
   }
   scores: Partial<Scores>
   comentario: string
@@ -22,7 +23,7 @@ export function emptyDraft(today: string): VisitDraft {
   return {
     placeId: null,
     wishId: null,
-    place: { nome: '', tipo: null, endereco: null, lat: null, lng: null, visitadoEm: today },
+    place: { nome: '', tipo: null, endereco: null, lat: null, lng: null, visitadoEm: today, google: null },
     scores: {},
     comentario: '',
   }
@@ -31,7 +32,9 @@ export function emptyDraft(today: string): VisitDraft {
 export function loadDraft(key: string): VisitDraft | null {
   try {
     const raw = localStorage.getItem(key)
-    return raw ? (JSON.parse(raw) as VisitDraft) : null
+    if (!raw) return null
+    const draft = JSON.parse(raw) as VisitDraft
+    return { ...draft, place: { ...draft.place, google: draft.place.google ?? null } }
   } catch {
     return null
   }

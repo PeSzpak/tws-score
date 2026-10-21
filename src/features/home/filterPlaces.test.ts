@@ -10,6 +10,7 @@ const place = (nome: string, tipo: Place['tipo']): Place => ({
   lng: null,
   visitadoEm: '2026-10-16',
   criadoPor: 'u1',
+  google: null,
 })
 
 const places = [place('Padaria São Jorge', 'cafe'), place('Cantina Roma', 'restaurante'), place('Café Lumi', 'cafe')]

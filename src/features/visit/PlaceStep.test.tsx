@@ -86,3 +86,17 @@ test('trocar a localização desfaz o vínculo com o Google', async () => {
   await userEvent.click(await screen.findByRole('button', { name: 'trocar' }))
   expect(onPlace).toHaveBeenLastCalledWith(expect.objectContaining({ lat: null, google: null }))
 })
+
+test('apagar e redigitar uma busca já feita não chama o Google de novo', async () => {
+  google.searchPlaces.mockClear().mockResolvedValue([{ placeId: 'g1', nome: 'Café Lumi', detalhe: '' }])
+  render(<Harness onPlace={() => {}} />)
+  const input = screen.getByLabelText('Nome do lugar')
+
+  await userEvent.type(input, 'café lu')
+  await screen.findByRole('button', { name: /Café Lumi/ })
+  await userEvent.type(input, '{Backspace}u')
+  await new Promise((r) => setTimeout(r, 500))
+
+  expect(screen.getByRole('button', { name: /Café Lumi/ })).toBeInTheDocument()
+  expect(google.searchPlaces.mock.calls.filter(([q]) => q === 'café lu')).toHaveLength(1)
+})

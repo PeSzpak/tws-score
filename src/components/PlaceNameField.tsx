@@ -8,19 +8,28 @@ type Props = {
   onPick: (place: GooglePlace) => void
 }
 
-const SEARCH_DEBOUNCE_MS = 400
+const SEARCH_DEBOUNCE_MS = 200
 
 export function PlaceNameField({ value, onChange, onPick }: Props) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const sessionToken = useRef(crypto.randomUUID())
+  const cache = useRef(new Map<string, Suggestion[]>())
 
   useEffect(() => {
     if (!googleEnabled || query.trim().length < 3) return
+    const cached = cache.current.get(query)
+    if (cached) {
+      setSuggestions(cached)
+      return
+    }
     const controller = new AbortController()
     const timer = setTimeout(() => {
       searchPlaces(query, sessionToken.current, controller.signal)
-        .then(setSuggestions)
+        .then((found) => {
+          cache.current.set(query, found)
+          setSuggestions(found)
+        })
         .catch(() => undefined)
     }, SEARCH_DEBOUNCE_MS)
     return () => {

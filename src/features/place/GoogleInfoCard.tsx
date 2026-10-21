@@ -1,15 +1,19 @@
 import { useState } from 'react'
-import { Clock, ExternalLink, MapPinned, Phone, Star } from 'lucide-react'
+import { Clock, ExternalLink, MapPinned, Navigation, Phone, Star } from 'lucide-react'
 import { groupHours, weekdayIndex } from '../../lib/hours'
 import type { GoogleInfo } from '../../lib/types'
 import styles from './GoogleInfoCard.module.css'
 
-type Props = { nome: string; info: GoogleInfo }
+type Props = { nome: string; info: GoogleInfo; lat?: number | null; lng?: number | null }
 
 function mapsUrl(nome: string, info: GoogleInfo): string {
   if (info.mapsUrl) return info.mapsUrl
   const params = new URLSearchParams({ api: '1', query: nome, query_place_id: info.placeId })
   return `https://www.google.com/maps/search/?${params}`
+}
+
+function wazeUrl(lat: number, lng: number): string {
+  return `https://waze.com/ul?${new URLSearchParams({ ll: `${lat},${lng}`, navigate: 'yes' })}`
 }
 
 function Hours({ horarios }: { horarios: string[] }) {
@@ -45,7 +49,7 @@ function Hours({ horarios }: { horarios: string[] }) {
   )
 }
 
-export function GoogleInfoCard({ nome, info }: Props) {
+export function GoogleInfoCard({ nome, info, lat = null, lng = null }: Props) {
   return (
     <section className={styles.card} aria-label="No Google">
       {(info.nota !== null || info.nivelPreco !== null) && (
@@ -75,9 +79,16 @@ export function GoogleInfoCard({ nome, info }: Props) {
             <Phone size={16} strokeWidth={1.6} /> Ligar
           </a>
         )}
-        <a className="btn" href={mapsUrl(nome, info)} target="_blank" rel="noreferrer">
-          <MapPinned size={16} strokeWidth={1.6} /> Abrir no Google Maps
-        </a>
+        <div className={styles.directions}>
+          <a className="btn" href={mapsUrl(nome, info)} target="_blank" rel="noreferrer">
+            <MapPinned size={16} strokeWidth={1.6} /> Google Maps
+          </a>
+          {lat !== null && lng !== null && (
+            <a className="btn" href={wazeUrl(lat, lng)} target="_blank" rel="noreferrer">
+              <Navigation size={16} strokeWidth={1.6} /> Waze
+            </a>
+          )}
+        </div>
       </div>
     </section>
   )

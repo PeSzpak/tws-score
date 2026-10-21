@@ -165,7 +165,7 @@ export function WishlistPage() {
               </div>
               {open === item.id && item.google && (
                 <div className={styles.details}>
-                  <GoogleInfoCard nome={item.nome} info={item.google} />
+                  <GoogleInfoCard nome={item.nome} info={item.google} lat={item.lat} lng={item.lng} />
                 </div>
               )}
               {confirming === item.id && (

@@ -145,7 +145,7 @@ export function PlacePage() {
 
         <PhotoGallery urls={data.data.photos} uploading={busy} onAdd={addPhotos} />
 
-        {p.google && <GoogleInfoCard nome={p.nome} info={p.google} />}
+        {p.google && <GoogleInfoCard nome={p.nome} info={p.google} lat={p.lat} lng={p.lng} />}
 
         {p.lat !== null && p.lng !== null && (
           <Suspense>

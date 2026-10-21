@@ -53,3 +53,16 @@ test('horários mostram o de hoje e agrupam os dias iguais', () => {
   expect(screen.getByText('sáb e dom')).toBeInTheDocument()
   expect(screen.queryByText(/segunda-feira/)).not.toBeInTheDocument()
 })
+
+test('com localização, o Waze abre a rota direto pro lugar', () => {
+  render(<GoogleInfoCard nome="Café Lumi" info={full} lat={-25.44} lng={-49.28} />)
+  expect(screen.getByRole('link', { name: /Waze/ })).toHaveAttribute(
+    'href',
+    'https://waze.com/ul?ll=-25.44%2C-49.28&navigate=yes',
+  )
+})
+
+test('sem localização, não tem botão do Waze', () => {
+  render(<GoogleInfoCard nome="Café Lumi" info={full} lat={null} lng={null} />)
+  expect(screen.queryByRole('link', { name: /Waze/ })).not.toBeInTheDocument()
+})
